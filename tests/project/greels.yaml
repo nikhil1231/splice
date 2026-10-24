@@ -1,0 +1,26 @@
+# The cast the tests are written against: a family of four and a camera.
+# Every test gets its own copy of this folder (see conftest.py).
+name: Grandparents
+footage: family footage of Konkani-speaking grandparents in Goa, being cut into short Instagram reels
+language: Konkani
+transcription: romanised Konkani
+people:
+  - id: grandma
+    name: Grandma
+    describe: the older woman
+    colour: 1 0.85 0.4 1
+  - id: grandpa
+    name: Grandpa
+    describe: the older man
+    colour: 0.55 0.83 1 1
+  - id: both
+    name: Both Grandparents
+    word: grandparents
+    speaker: false
+  - id: nikhil
+    name: Nikhil
+    camera: true
+    colour: 1 1 1 1
+  - id: relative
+    name: Relative
+    colour: 0.65 1 0.7 1

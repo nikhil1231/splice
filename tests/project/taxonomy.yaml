@@ -1,0 +1,144 @@
+aliases:
+  theme:historical: tone:historical
+  theme:history: tone:historical
+namespaces:
+- person
+- theme
+- era
+- location
+- tone
+- object
+- quality
+tags:
+  era:1930s:
+    fcp_label: 1930s
+  era:1940s:
+    fcp_label: 1940s
+  era:1950s:
+    fcp_label: 1950s
+  era:1960s:
+    fcp_label: 1960s
+  era:1970s:
+    fcp_label: 1970s
+  era:1980s:
+    fcp_label: 1980s
+  era:1990s:
+    fcp_label: 1990s
+  era:2000s:
+    fcp_label: 2000s
+  era:present:
+    fcp_label: Present Day
+  location:balcony:
+    fcp_label: Balcony
+  location:bombay:
+    fcp_label: Bombay
+  location:goa:
+    fcp_label: Goa
+  location:home:
+    fcp_label: Their Flat
+  location:kanyakumari:
+    fcp_label: Kanyakumari
+  location:kitchen:
+    fcp_label: Kitchen
+  location:london:
+    fcp_label: London
+  location:margao:
+    fcp_label: Margao
+  location:panjim:
+    fcp_label: Panjim
+  location:vasco:
+    fcp_label: Vasco
+  object:airpods:
+    fcp_label: AirPods
+  object:chapati:
+    fcp_label: Chapati
+  object:coconut_scraper:
+    fcp_label: Coconut Scraper
+  object:digital_diary:
+    fcp_label: Digital Diary
+  object:echo_show:
+    fcp_label: Echo Show
+  object:glasses:
+    fcp_label: Glasses
+  object:newspaper:
+    fcp_label: Newspaper
+  object:photo_album:
+    fcp_label: Photo Album
+  object:router:
+    fcp_label: Router
+  object:sewing_machine:
+    fcp_label: Sewing Machine
+  person:both:
+    fcp_label: Both Grandparents
+  person:grandma:
+    fcp_label: Grandma
+  person:grandpa:
+    fcp_label: Grandpa
+  person:nikhil:
+    fcp_label: Nikhil
+  person:relative:
+    fcp_label: Relative
+  quality:broll:
+    fcp_label: B-Roll
+  quality:noisy_audio:
+    fcp_label: Noisy Audio
+  quality:reel_candidate:
+    fcp_label: Reel Candidate
+  quality:silent:
+    fcp_label: Silent
+  theme:acting:
+    fcp_label: Acting
+  theme:banking:
+    fcp_label: Banking
+  theme:childhood:
+    fcp_label: Childhood
+  theme:cooking:
+    fcp_label: Cooking
+  theme:cricket:
+    fcp_label: Cricket
+  theme:daily_life:
+    fcp_label: Daily Life
+  theme:education:
+    fcp_label: Education
+  theme:family:
+    fcp_label: Family
+  theme:food:
+    fcp_label: Food
+  theme:goodbye:
+    fcp_label: Goodbye
+  theme:health:
+    fcp_label: Health
+  theme:joint_family:
+    fcp_label: Joint Family
+  theme:language:
+    fcp_label: Language
+  theme:marriage:
+    fcp_label: Marriage
+  theme:memory:
+    fcp_label: Memory
+  theme:money:
+    fcp_label: Money
+  theme:photos:
+    fcp_label: Old Photos
+  theme:religion:
+    fcp_label: Religion
+  theme:technology:
+    fcp_label: Technology
+  theme:television:
+    fcp_label: Television
+  theme:travel:
+    fcp_label: Travel
+  theme:work:
+    fcp_label: Work
+  tone:characteristic:
+    fcp_label: Characteristic
+  tone:emotional:
+    fcp_label: Emotional
+  tone:funny:
+    fcp_label: Funny
+  tone:historical:
+    fcp_label: Historical
+  tone:quiet:
+    fcp_label: Quiet
+  tone:sweet:
+    fcp_label: Sweet

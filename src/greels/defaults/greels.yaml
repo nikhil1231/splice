@@ -1,0 +1,45 @@
+# greels project settings. Everything here has a default; change what fits.
+# The prompts read these, so the model knows what it is looking at.
+
+# The Final Cut event / Resolve bin the clips go into, and the name of the
+# library export (footage.fcpxml).
+name: Footage
+
+# One phrase for the model: what this is, and what it is being cut into.
+footage: family footage, being cut into short vertical videos
+
+# The language people speak on camera. Captions and the browser call the
+# original lines by this name. Every line is also translated into English.
+language: ""
+
+# How to write that language down, if not just its name -- for example
+# "romanised Konkani" for a language whose own script nobody will read.
+transcription: ""
+
+# Where `greels backup` (and the browser, 90 s after an edit) mirrors the
+# transcripts, cuts, plans and these settings. Make it a private git repo.
+# Relative paths are from this folder.
+archive: archive
+
+# Who is in the footage. Each id becomes a person:<id> tag and a speaker the
+# model can attribute a line to. colour is a Final Cut title colour, "r g b a"
+# from 0 to 1; leave it out for white.
+people: []
+#  - id: grandma
+#    name: Grandma
+#    describe: the older woman
+#    colour: 1 0.85 0.4 1
+#  - id: grandpa
+#    name: Grandpa
+#    describe: the older man
+#    colour: 0.55 0.83 1 1
+#  - id: both            # a group: tags a moment, never says a line
+#    name: Both Grandparents
+#    word: grandparents  # what a clip about them is named with
+#    speaker: false
+#  - id: me
+#    name: Me
+#    camera: true        # holding the camera and asking the questions
+
+# To change a prompt, copy it from greels' defaults into prompts/ here
+# (`greels init` tells you where they are) and edit the copy.
