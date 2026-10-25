@@ -1,9 +1,9 @@
 # Working on Splice
 
-The README is the specification and the design record. Read it before changing
-anything; if a change makes a sentence in it untrue, the sentence is part of
-the change. (That has caught real bugs here — the browser sent only the lines
-inside a trim while the README described showing the whole moment.)
+The README is the user guide and describes what the tool does. If a change
+makes a sentence in it untrue, fix the sentence in the same change. The reasons
+behind the design are in the code comments and docstrings, so keep those
+current too.
 
 ## What must not be lost
 
