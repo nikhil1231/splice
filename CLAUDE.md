@@ -1,4 +1,4 @@
-# Working on greels
+# Working on Splice
 
 The README is the specification and the design record. Read it before changing
 anything; if a change makes a sentence in it untrue, the sentence is part of
@@ -19,10 +19,10 @@ Everything else is derived and safe to delete: `library.sqlite`, `work/`,
 `export/`. A segment's state (unseen … published) is derived too, by
 `plans.segment_states`, and is never stored. Before any write that destroys
 one of the files above, call `trash.keep()`. `backup` mirrors them, and the
-project's own `greels.yaml`, `taxonomy.yaml` and prompts, into the archive its
-`greels.yaml` names -- a private repo of its own, never this one -- and the
+project's own `splice.yaml`, `taxonomy.yaml` and prompts, into the archive its
+`splice.yaml` names -- a private repo of its own, never this one -- and the
 server does that on its own 90 seconds after the last edit. A scratch
-`GREELS_ROOT` has no greels.yaml and so no archive, and an archive refuses a
+`SPLICE_ROOT` has no splice.yaml and so no archive, and an archive refuses a
 media root other than the one in its manifest.
 
 Never edit the user's actual archive to test something. Build the command, run
@@ -33,10 +33,10 @@ make a scratch one and delete it afterwards.
 
 Nothing in `src/` knows about any one family. What the footage is, its
 language, who is in it and where it is backed up are `config.project()`, read
-from the project's `greels.yaml`; the prompts and starting vocabulary are in
-`src/greels/defaults/`, and a project's own copies win. The tests' cast (a
+from the project's `splice.yaml`; the prompts and starting vocabulary are in
+`src/splice/defaults/`, and a project's own copies win. The tests' cast (a
 family of four and a camera, speaking Konkani) is `tests/project/`, copied
-fresh for every test by `conftest.py` -- which also points `GREELS_ROOT`,
+fresh for every test by `conftest.py` -- which also points `SPLICE_ROOT`,
 `XDG_CONFIG_HOME` and the archive away from whoever is running them.
 
 The analysis fingerprint (`analyze.prompt_sha`) is what decides which clips are
@@ -115,7 +115,7 @@ something; fake the media pool the way `tests/test_resolve.py` does.
 
 ```bash
 uv run pytest -q          # ~930 tests, about 11 seconds
-uv run greels doctor      # whether the machine around the archive still works
+uv run splice doctor      # whether the machine around the archive still works
 uvx ruff check --select F401,F841 src/ tests/
 ```
 

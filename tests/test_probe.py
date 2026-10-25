@@ -11,7 +11,7 @@ from fractions import Fraction
 
 import pytest
 
-from greels import probe
+from splice import probe
 
 
 # --- the frame rate ----------------------------------------------------

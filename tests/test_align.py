@@ -1,4 +1,4 @@
-"""`greels align` -- moving the subtitle timings onto the speech.
+"""`splice align` -- moving the subtitle timings onto the speech.
 
 The detector is stood in for. What matters is what the command does with what
 it hears: that lines move, that segment boundaries do not, and that running it
@@ -7,17 +7,17 @@ twice is not different from running it once.
 
 import pytest
 
-from greels import cli, config, library
-from greels.schema import Asset, Line, Segment, Sidecar
+from splice import cli, config, library
+from splice.schema import Asset, Line, Segment, Sidecar
 
 
-# --- greels align ----------------------------------------------------------
+# --- splice align ----------------------------------------------------------
 
 
 @pytest.fixture
 def spoken(tmp_path, monkeypatch):
     """A clip whose lines were estimated a little off the actual speech."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     proxies = config.proxy_dir()
     proxies.mkdir(parents=True, exist_ok=True)
     (proxies / "a.mp4").write_bytes(b"proxy")
@@ -31,7 +31,7 @@ def spoken(tmp_path, monkeypatch):
         ],
     ).save(config.sidecar_path("a"))
     monkeypatch.setattr(
-        "greels.speech.runs_for", lambda stem, cache=None: [[4.7, 9.0], [19.0, 25.0]]
+        "splice.speech.runs_for", lambda stem, cache=None: [[4.7, 9.0], [19.0, 25.0]]
     )
     return tmp_path
 
@@ -58,7 +58,7 @@ def test_a_dry_run_moves_nothing(spoken):
 
 
 def test_align_keeps_the_transcript_it_is_about_to_change(spoken):
-    from greels import trash
+    from splice import trash
 
     cli.align(only=None, window=None, dry_run=False)
     assert [e for e in trash.entries() if e.original.startswith("a.seg")]
@@ -73,7 +73,7 @@ def test_align_is_idempotent(spoken):
 
 
 def test_a_clip_with_no_proxy_is_left_alone(spoken, monkeypatch):
-    monkeypatch.setattr("greels.speech.runs_for", lambda stem, cache=None: [])
+    monkeypatch.setattr("splice.speech.runs_for", lambda stem, cache=None: [])
     cli.align(only=None, window=None, dry_run=False)
     assert library.load_sidecar("a").segments[0].lines[0].start == 4.0
 

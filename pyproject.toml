@@ -1,5 +1,5 @@
 [project]
-name = "greels"
+name = "splice"
 version = "0.1.0"
 license = "MIT"
 readme = "README.md"
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-greels = "greels.cli:main"
+splice = "splice.cli:main"
 
 [dependency-groups]
 dev = ["pytest>=8.0"]
@@ -23,11 +23,11 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/greels"]
+packages = ["src/splice"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"src/greels/web" = "greels/web"
-"src/greels/defaults" = "greels/defaults"
+"src/splice/web" = "splice/web"
+"src/splice/defaults" = "splice/defaults"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

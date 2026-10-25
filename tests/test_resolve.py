@@ -10,11 +10,11 @@ from pathlib import Path
 
 import pytest
 
-from greels import editors, resolve
-from greels.export_fcpxml import (
+from splice import editors, resolve
+from splice.export_fcpxml import (
     Reconciliation, held_clips, mark_offered, pending, preview, reconcile,
 )
-from greels.schema import Asset, ExportRecord, Segment, Sidecar
+from splice.schema import Asset, ExportRecord, Segment, Sidecar
 
 
 class FakeClip:
@@ -65,9 +65,9 @@ def attach(monkeypatch, pool):
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    from greels import config
+    from splice import config
 
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     config.index_dir().mkdir(parents=True, exist_ok=True)
     return tmp_path
 
@@ -210,9 +210,9 @@ def test_what_final_cut_holds_says_nothing_about_what_resolve_holds(
     """
     sidecars = [clip("lunch")]
     monkeypatch.setattr(
-        "greels.fcp.imported_clips", lambda bundle=None: {"lunch": 1}
+        "splice.fcp.imported_clips", lambda bundle=None: {"lunch": 1}
     )
-    monkeypatch.setattr("greels.fcp.duplicate_names", lambda bundle=None: {})
+    monkeypatch.setattr("splice.fcp.duplicate_names", lambda bundle=None: {})
     reconcile(sidecars, "fcp")
 
     assert sidecars[0].delivery("fcp").delivered
@@ -297,7 +297,7 @@ def test_a_sidecar_written_before_resolve_existed_still_loads(archive):
     They have no `deliveries` key at all, and must load as clips Final Cut
     holds and Resolve does not.
     """
-    from greels import config
+    from splice import config
 
     path = config.sidecar_path("lunch")
     path.write_text(
@@ -317,7 +317,7 @@ def test_the_default_editor_is_what_an_unasked_call_gets(archive, monkeypatch):
     Omitting it has to keep meaning Final Cut, or a caller that was never
     updated starts writing to the wrong record.
     """
-    monkeypatch.delenv("GREELS_EDITOR", raising=False)
+    monkeypatch.delenv("SPLICE_EDITOR", raising=False)
     sidecars = [clip("lunch")]
     mark_offered(sidecars)
     assert sidecars[0].exported.offered_at is not None
@@ -334,7 +334,7 @@ def test_a_re_analysis_keeps_every_editors_delivery_record(archive):
     holding a stringout of markers for boundaries that no longer exist, and
     nothing saying so.
     """
-    from greels.cli import _carry_review_state
+    from splice.cli import _carry_review_state
 
     old = clip("lunch")
     old.set_delivery("resolve", ExportRecord(

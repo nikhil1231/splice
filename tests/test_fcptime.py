@@ -4,7 +4,7 @@ from fractions import Fraction
 
 import pytest
 
-from greels.fcptime import frame_duration, frames, rational, snap, timebase
+from splice.fcptime import frame_duration, frames, rational, snap, timebase
 
 
 def test_integer_rate_uses_apple_timescale():

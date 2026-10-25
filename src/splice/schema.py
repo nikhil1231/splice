@@ -211,7 +211,7 @@ class Sidecar(BaseModel):
 
 def agy_schema() -> dict:
     """The schema, with the project's language and people written into its
-    descriptions. Rendered the same way from the same greels.yaml every time,
+    descriptions. Rendered the same way from the same splice.yaml every time,
     because it is half of the fingerprint that decides what is re-analysed."""
     p = config.project()
     who = f"{', '.join(p.speakers)}, or unknown" if p.speakers else "unknown"

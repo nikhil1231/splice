@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from greels import analyze
-from greels.taxonomy import Taxonomy
+from splice import analyze
+from splice.taxonomy import Taxonomy
 
 
 @pytest.fixture

@@ -1,11 +1,11 @@
 """Reading a cut back out of Final Cut.
 
 Final Cut is not installed here, so an FCPXML it exported cannot be the
-fixture. Two things stand in. The documents greels writes itself are real
+fixture. Two things stand in. The documents splice writes itself are real
 FCPXML and go through the real reader, which makes the round trip -- export a
 cut, read it back, get the same captions -- the strongest check available
 without the application. The rest are hand-built spines holding the shapes
-Final Cut writes and greels never does: connected clips, gaps, compounds,
+Final Cut writes and splice never does: connected clips, gaps, compounds,
 retimes, and footage the archive has never seen.
 """
 
@@ -13,8 +13,8 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from greels import export_reel, import_fcpxml, reel
-from greels.schema import Asset, Line, Segment, Sidecar
+from splice import export_reel, import_fcpxml, reel
+from splice.schema import Asset, Line, Segment, Sidecar
 
 
 @pytest.fixture
@@ -213,10 +213,10 @@ def test_an_event_export_says_what_it_is_missing(tmp_path, sidecars):
         import_fcpxml.read(path, sidecars=sidecars)
 
 
-# --- the shapes Final Cut writes and greels never does ----------------------
+# --- the shapes Final Cut writes and splice never does ----------------------
 #
 # Everything above this line passed while the reader was badly wrong, because
-# the documents it builds are the ones greels writes: a flat spine of
+# the documents it builds are the ones splice writes: a flat spine of
 # `<asset-clip>`. A real export of a real cut wraps shots in `<clip>`, detaches
 # audio under a `<gap>`, and writes a `timeMap` on anything that has been near
 # the retime editor. These are taken from Ep1's own export.
@@ -395,7 +395,7 @@ def test_a_resolve_timeline_that_starts_at_an_hour_still_starts_the_cut_at_zero(
     assert _captions(cut) == [(0.0, 2.0, "crow"), (2.0, 4.0, "three")]
 
 
-def test_the_resolve_timeline_greels_writes_reads_back_as_the_cut_it_was(
+def test_the_resolve_timeline_splice_writes_reads_back_as_the_cut_it_was(
     tmp_path, sidecars
 ):
     """The round trip, for the second editor.

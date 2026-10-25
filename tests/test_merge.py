@@ -7,10 +7,10 @@ pin down how that gets resolved.
 
 import pytest
 
-from greels.analyze import merge_segments, to_segments
-from greels.proxy import chunk_offsets
-from greels.schema import Line, Segment
-from greels.taxonomy import Taxonomy
+from splice.analyze import merge_segments, to_segments
+from splice.proxy import chunk_offsets
+from splice.schema import Line, Segment
+from splice.taxonomy import Taxonomy
 
 
 def seg(start, end, title="x", lines=None):

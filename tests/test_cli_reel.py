@@ -1,4 +1,4 @@
-"""The `greels reel` commands, driven the way they are actually used.
+"""The `splice reel` commands, driven the way they are actually used.
 
 The reel model and the exporter are tested directly elsewhere; what these
 cover is the part that only exists in the CLI -- resolving a shot by position
@@ -9,13 +9,13 @@ doing something quietly wrong.
 import pytest
 import typer
 
-from greels import cli_reel, config, index, reel as store
-from greels.schema import Asset, Segment, Sidecar
+from splice import cli_reel, config, index, reel as store
+from splice.schema import Asset, Segment, Sidecar
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     Sidecar(
         asset=Asset(file="a.MOV", stem="a", duration=100, fps="30",
                     width=1080, height=1920, created="2026-02-01T00:00:00Z"),
@@ -182,7 +182,7 @@ def test_a_duplicate_is_a_copy_and_not_a_reference(archive):
 def heard(monkeypatch):
     """Talking from 0.5 to 8s and from 9.5 to 29.5s, with a pause between."""
     monkeypatch.setattr(
-        "greels.speech.runs_for", lambda stem, cache=None: [[0.5, 8.0], [9.5, 29.5]]
+        "splice.speech.runs_for", lambda stem, cache=None: [[0.5, 8.0], [9.5, 29.5]]
     )
 
 
@@ -202,7 +202,7 @@ def test_a_boundary_no_utterance_is_near_is_left_alone(archive, monkeypatch):
     """A b-roll shot of a cupboard has nothing to snap to, and saying so is
     better than moving it two seconds to the nearest voice."""
     monkeypatch.setattr(
-        "greels.speech.runs_for", lambda stem, cache=None: [[40.0, 50.0]]
+        "splice.speech.runs_for", lambda stem, cache=None: [[40.0, 50.0]]
     )
     cli_reel.reel_new("Marriage", from_tag=None, segment=["a#00000.00"], said=None, search="",
                       tag=[], rating="", limit=40, order="found", hook="")
@@ -218,7 +218,7 @@ def test_a_dry_run_changes_nothing(archive, heard):
 
 
 def test_snapping_keeps_the_cut_it_is_about_to_change(archive, heard):
-    from greels import trash
+    from splice import trash
 
     cli_reel.reel_new("Marriage", from_tag=None, segment=["a#00000.00"], said=None, search="",
                       tag=[], rating="", limit=40, order="found", hook="")
@@ -229,7 +229,7 @@ def test_snapping_keeps_the_cut_it_is_about_to_change(archive, heard):
 
 def test_a_snap_cannot_push_a_shot_past_the_end_of_its_clip(archive, monkeypatch):
     monkeypatch.setattr(
-        "greels.speech.runs_for", lambda stem, cache=None: [[50.0, 400.0]]
+        "splice.speech.runs_for", lambda stem, cache=None: [[50.0, 400.0]]
     )
     cli_reel.reel_new("Long", from_tag=None, segment=["a#00030.00"], said=None, search="",
                       tag=[], rating="", limit=40, order="found", hook="")
@@ -242,7 +242,7 @@ def test_a_snap_cannot_push_a_shot_past_the_end_of_its_clip(archive, monkeypatch
 
 def test_said_makes_one_shot_per_time_it_is_said(archive, heard, monkeypatch):
     """"Every time he mentions money" is a reel format, and one command."""
-    monkeypatch.setattr("greels.index.search_lines", lambda q, limit=30: [
+    monkeypatch.setattr("splice.index.search_lines", lambda q, limit=30: [
         {"segment_id": "b#00010.00", "stem": "b", "start": 12.0, "end": 14.0,
          "en": "Seven rupees.", "kok": "Satt rupya."},
         {"segment_id": "a#00000.00", "stem": "a", "start": 4.0, "end": 6.0,
@@ -261,7 +261,7 @@ def test_said_makes_one_shot_per_time_it_is_said(archive, heard, monkeypatch):
 
 
 def test_a_phrase_nobody_says_stops_rather_than_making_an_empty_cut(archive, monkeypatch):
-    monkeypatch.setattr("greels.index.search_lines", lambda q, limit=30: [])
+    monkeypatch.setattr("splice.index.search_lines", lambda q, limit=30: [])
     with pytest.raises(typer.Exit):
         cli_reel.reel_new("Nothing", from_tag=None, segment=[], said="helicopter",
                           search="", tag=[], rating="", limit=40, order="found", hook="")
@@ -278,7 +278,7 @@ def test_export_refuses_a_language_it_does_not_have(archive):
 def test_a_capped_supercut_says_it_is_capped(archive, heard, monkeypatch, capsys):
     """"Every time he says it" that is really "the first forty times" is a
     different offer."""
-    monkeypatch.setattr("greels.index.search_lines", lambda q, limit=30: [
+    monkeypatch.setattr("splice.index.search_lines", lambda q, limit=30: [
         {"segment_id": "a#00000.00", "stem": "a", "start": float(i), "end": i + 1.0,
          "en": f"line {i}", "kok": ""} for i in range(limit)
     ])

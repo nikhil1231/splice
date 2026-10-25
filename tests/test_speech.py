@@ -10,13 +10,13 @@ import json
 
 import pytest
 
-from greels import config, library, speech
-from greels.schema import Asset, Sidecar
+from splice import config, library, speech
+from splice.schema import Asset, Sidecar
 
 
 @pytest.fixture(autouse=True)
 def root(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     (tmp_path / "index").mkdir()
     proxies = config.proxy_dir()
     proxies.mkdir(parents=True)

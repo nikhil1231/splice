@@ -6,15 +6,15 @@ second Gemini run, and a second copy of the same footage in Final Cut.
 
 import pytest
 
-from greels import config, identity, library
-from greels.identity import Verdict
-from greels.probe import fingerprint
-from greels.schema import Asset, Segment, Sidecar
+from splice import config, identity, library
+from splice.identity import Verdict
+from splice.probe import fingerprint
+from splice.schema import Asset, Segment, Sidecar
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     config.raw_dir().mkdir(parents=True)
     config.proxy_dir().mkdir(parents=True)
     config.chunk_dir().mkdir(parents=True)
@@ -126,7 +126,7 @@ def test_replacing_a_file_in_place_is_noticed(archive):
 
 def test_an_unchanged_file_is_not_rehashed(archive, monkeypatch):
     """A steady-state sync must not read 14 GB of footage."""
-    import greels.probe as probe
+    import splice.probe as probe
 
     known("lunch")
     calls = []

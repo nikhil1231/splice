@@ -1,4 +1,4 @@
-# greels
+# Splice
 
 Turns a pile of family footage into something you can cut short videos from.
 It watches every clip with Gemini, splits it into named moments with
@@ -10,7 +10,7 @@ It was built for one archive -- hours of Konkani-speaking grandparents in Goa,
 filmed on a phone and cut into Instagram reels -- and that archive is the
 example all through this README: *Grandma*, *Grandpa*, the person holding the
 camera asking the questions, the romanised Konkani above the English. Yours is
-described in a `greels.yaml` instead: what the footage is, the language spoken,
+described in a `splice.yaml` instead: what the footage is, the language spoken,
 and who is in it. See [Your project](#your-project).
 
 The useful unit here is not a file, it is `video + start + end + meaning +
@@ -33,7 +33,7 @@ raw/*.MOV ─▶ work/proxies ─▶ work/chunks ─▶ agy ─▶ index/*.seg.j
                                                         └▶ export/reels/*.mp4
                                                             (something to watch)
 
-              the editor ──▶ Ep1.fcpxml ──▶ greels captions ──▶ Ep1.srt ──▶ back
+              the editor ──▶ Ep1.fcpxml ──▶ splice captions ──▶ Ep1.srt ──▶ back
                 (the cut you actually made, captioned in its own running order)
 ```
 
@@ -53,7 +53,7 @@ are not the same file with a different name on it, and what differs is in
 The loop this is all for, once the footage is in:
 
 ```bash
-uv run greels serve
+uv run splice serve
 ```
 
 1. **Review**, most promising first, at 1.5×. <kbd>F</kbd> keeps, <kbd>X</kbd>
@@ -80,8 +80,8 @@ give you back.
 ```bash
 brew install ffmpeg
 uv sync
-uv run greels init ~/Movies/my-family    # a folder for the footage, and a greels.yaml
-uv run greels doctor                     # what is missing
+uv run splice init ~/Movies/my-family    # a folder for the footage, and a splice.yaml
+uv run splice doctor                     # what is missing
 ```
 
 `uv sync` brings Pillow, which is here for one thing: Homebrew's ffmpeg cannot
@@ -91,16 +91,16 @@ draw text, so burnt-in captions are drawn as pictures and composited.
 be on PATH and signed in; it is what watches the footage and writes the
 transcripts. Nothing else here talks to a network.
 
-greels was written on a Mac and is most at home there: hardware encoding is
+Splice was written on a Mac and is most at home there: hardware encoding is
 VideoToolbox, the caption fonts are the ones macOS ships, and exports are
 checked against the FCPXML DTDs inside Final Cut. Resolve support exists so it
 can run elsewhere, but that has not been finished.
 
 ## Your project
 
-A project is one folder: the footage goes in `raw/`, everything greels makes
-goes in `index/`, `work/` and `export/`, and a `greels.yaml` says what the
-footage is. `greels init` writes a commented one; the parts that matter:
+A project is one folder: the footage goes in `raw/`, everything Splice makes
+goes in `index/`, `work/` and `export/`, and a `splice.yaml` says what the
+footage is. `splice init` writes a commented one; the parts that matter:
 
 ```yaml
 name: Grandparents        # the Final Cut event / Resolve bin, and grandparents.fcpxml
@@ -122,17 +122,17 @@ people:
     camera: true                         # behind the camera; never what a clip is named after
 ```
 
-greels finds the project from `GREELS_ROOT` if it is set, else from the nearest
-folder above where it was started that holds a `greels.yaml`, else from the
-default `greels init` records in `~/.config/greels/config.yaml` -- so `serve`
+Splice finds the project from `SPLICE_ROOT` if it is set, else from the nearest
+folder above where it was started that holds a `splice.yaml`, else from the
+default `splice init` records in `~/.config/splice/config.yaml` -- so `serve`
 can be started from anywhere.
 
-Beside `greels.yaml` sit the project's own **`taxonomy.yaml`**, the vocabulary
+Beside `splice.yaml` sit the project's own **`taxonomy.yaml`**, the vocabulary
 of tags (`init` copies a starting one), and optionally a **`prompts/`** folder.
-The prompts greels sends are `analyze.md` (watch a clip, return its moments)
-and `drafts.md` (propose stories from transcripts), in `src/greels/defaults/`.
+The prompts Splice sends are `analyze.md` (watch a clip, return its moments)
+and `drafts.md` (propose stories from transcripts), in `src/splice/defaults/`.
 They fill `{footage}`, `{written}`, `{spoken}` and `{speakers}` from
-`greels.yaml`. To change one for this project, copy it into `prompts/` and edit
+`splice.yaml`. To change one for this project, copy it into `prompts/` and edit
 the copy.
 
 What the model was asked is fingerprinted into every sidecar, and `analyze`
@@ -148,7 +148,7 @@ them by the project's `language`.
 ## Final Cut or Resolve
 
 Everything that hands work over takes `--editor fcp` or `--editor resolve`,
-and `GREELS_EDITOR` sets which one a bare command means. The browser has the
+and `SPLICE_EDITOR` sets which one a bare command means. The browser has the
 same choice as a pair of buttons in the header, remembered there the way the
 review speed is — it is a preference about how you work, not a fact about the
 archive, so it is not in the files and an address does not carry it. Final
@@ -171,7 +171,7 @@ resolv` into an import that quietly does nothing.
 | favorite / reject | a `<rating>` range | nothing |
 | the spoken lines | captions on the timeline | the **`.srt`** beside it |
 | a re-offered clip | a second copy, `- a1` | the same clip, refreshed |
-| greels can read it | always | **only while it is running** |
+| Splice can read it | always | **only while it is running** |
 
 Taking those in turn, because each one cost something to find out:
 
@@ -225,13 +225,13 @@ Taking those in turn, because each one cost something to find out:
   project in it — and which Blackmagic ships as a Studio feature. An
   unreachable editor changes no import state, which is the same rule an
   unreadable Final Cut library has always followed, so a sync while Resolve is
-  closed is inert rather than wrong. `greels imported --editor resolve` sets
+  closed is inert rather than wrong. `splice imported --editor resolve` sets
   it by hand, and is needed far more often than its Final Cut equivalent.
 
 **What is measured and what is reasoned**, since the two are not the same and
 this file is the design record. The version ceiling is measured: Resolve 20's
 own `Developer/Scripting/README.txt` is on this disk and lists what it lists,
-and every document greels writes is put through Apple's DTD at that version
+and every document Splice writes is put through Apple's DTD at that version
 before it lands, which is a real check that really runs. The importer's
 behaviour is reasoned from Blackmagic's documented API — `ImportTimelineFromFile`
 is the only entry point it publishes, and `<keyword>`, `<rating>` and
@@ -251,7 +251,7 @@ anything you could see.
 One thing goes the other way, and it is the reason Resolve is worth the trip:
 
 ```bash
-uv run greels reel export 1961 --editor resolve --send
+uv run splice reel export 1961 --editor resolve --send
 ```
 
 `--send` puts the timeline into the open Resolve project through the scripting
@@ -266,7 +266,7 @@ instead of one.
 Chuck clips in `raw/`, then:
 
 ```bash
-uv run greels sync
+uv run splice sync
 ```
 
 That is the whole loop: scan, proxy, analyse whatever is new, reclassify against
@@ -312,14 +312,14 @@ The browser has the whole loop as a button: **Sync raw** in the header, beside
 **Back up**. It opens with the dry run, so what an hour of agy would be spent
 on is on screen before it is spent, and the run itself is the second click; its
 output is the same lines the terminal gets, arriving as they are printed.
-**Run ▾** beside it has the rest of greels — align, rename, the editor import
+**Run ▾** beside it has the rest of Splice — align, rename, the editor import
 of what is new, the exports, the two reports — each with its own dry run
 where the command has one, and each carrying the sentence that says what it
 does, because `reclassify` and `align` mean nothing from the name and the wrong
 guess costs an evening.
 
 Last in the header is the **health light** — `✓`, `⚠ 5` or `✕ 1`. It is
-`greels doctor`, which checks the machine around the archive rather than the
+`splice doctor`, which checks the machine around the archive rather than the
 footage in it: ffmpeg, agy, Apple's FCPXML DTD — which validates both editors'
 documents — whether Resolve is installed and whether it is answering, the room
 left on the disk, a
@@ -347,7 +347,7 @@ so refuse nothing.
 To look at what came out — and fix it:
 
 ```bash
-uv run greels serve          # http://127.0.0.1:8722
+uv run splice serve          # http://127.0.0.1:8722
 ```
 
 Browse plans, segments, clips, tags, reel suggestions and your cuts; edit a title,
@@ -497,7 +497,7 @@ the list behind the panel, with its title box ready to type in.
 Every moment has one state, worked out from the plans, the cuts, and its own
 rating and status. Nothing stores the state: all of those are already files,
 and a stored copy would only be a second answer that could disagree. The
-plans, the Segments rows and filter, the editor and `greels status` all draw
+plans, the Segments rows and filter, the editor and `splice status` all draw
 the same seven:
 
 | | State | What puts a moment there |
@@ -610,7 +610,7 @@ says *no longer in the index*, with the title it remembered still on screen.
 
 Every moment carries a poster frame, taken out of its proxy a beat in — the
 first frame of a segment is often the tail of the previous shot. They are built
-on demand as you scroll, ~130 ms and 8 KB each, or all at once with `greels
+on demand as you scroll, ~130 ms and 8 KB each, or all at once with `splice
 thumbs`.
 
 It plays the 480p proxies analysis already built — enough to find a trim point,
@@ -626,7 +626,7 @@ one of them runs 108, so a hit on a moment tells you "somewhere in the next two
 minutes he says this". A hit on a *line* tells you when:
 
 ```
-$ uv run greels lines "7 rupees"
+$ uv run splice lines "7 rupees"
 grandpa_full_life_story_interview   0:05:35  At that time, for 7 rupees, I went to Bombay.
 ```
 
@@ -638,8 +638,8 @@ hits come back best-match-first because "rupees" is said nine times.
 A line is also the finest thing you can put in a cut:
 
 ```bash
-uv run greels reel add money --line "7 rupees"
-uv run greels reel new "Every rupee" --said rupees   # a supercut
+uv run splice reel add money --line "7 rupees"
+uv run splice reel new "Every rupee" --said rupees   # a supercut
 ```
 
 `--said` makes one shot per time anybody says it, each cut to its own
@@ -661,7 +661,7 @@ three, then a count of the rest. Clicking one opens the moment with the player
 already on that sentence rather than ninety seconds before it. The tab that
 used to do this was a second place to type the same query; the only thing it
 knew that the moment list did not was *when*, and that is on the row now.
-`greels search` prints the same quotes, two of them, under each match.
+`splice search` prints the same quotes, two of them, under each match.
 
 Opening a clip gives you the whole thing to **watch and read at once**: the
 footage at the top, every moment below it with what was said, and any line
@@ -720,12 +720,12 @@ three that corresponds to nothing.
 The individual steps are still there when you want them:
 
 ```bash
-uv run greels scan / proxy / analyze -j 3 / rename / index / export all
-uv run greels thumbs                      # poster frames, otherwise built lazily
-uv run greels align --dry-run             # subtitle timings, onto the speech
-uv run greels status                      # where the footage has got to
-uv run greels status --editor resolve     # ... as far as Resolve is concerned
-uv run greels doctor                      # whether the machine around it still works
+uv run splice scan / proxy / analyze -j 3 / rename / index / export all
+uv run splice thumbs                      # poster frames, otherwise built lazily
+uv run splice align --dry-run             # subtitle timings, onto the speech
+uv run splice status                      # where the footage has got to
+uv run splice status --editor resolve     # ... as far as Resolve is concerned
+uv run splice doctor                      # whether the machine around it still works
 ```
 
 All of those but `scan` and `proxy` are in the browser's **Run ▾** menu as
@@ -735,24 +735,24 @@ the terminal is for the runs that take an argument.
 Finding things:
 
 ```bash
-uv run greels search "things that used to cost little"   # prose, tags, speech
-uv run greels search --order promise      # what is worth watching first
-uv run greels lines "7 rupees"            # every time somebody says it
-uv run greels search --tag person:grandma --tag tone:funny
-uv run greels search --tag theme:money --unused --rating favorite
-uv run greels related "7 train"          # moments like this one, anywhere
-uv run greels reels                       # suggested reels across clips
-uv run greels tags                        # the vocabulary and what it covers
+uv run splice search "things that used to cost little"   # prose, tags, speech
+uv run splice search --order promise      # what is worth watching first
+uv run splice lines "7 rupees"            # every time somebody says it
+uv run splice search --tag person:grandma --tag tone:funny
+uv run splice search --tag theme:money --unused --rating favorite
+uv run splice related "7 train"          # moments like this one, anywhere
+uv run splice reels                       # suggested reels across clips
+uv run splice tags                        # the vocabulary and what it covers
 ```
 
 Making one:
 
 ```bash
-uv run greels reel new "1961" --from era:1960s   # seed from a suggestion
-uv run greels reel show 1961
-uv run greels reel export 1961                   # -> a Final Cut timeline
-uv run greels reel export 1961 -e resolve        # -> one Resolve can open
-uv run greels captions ~/Downloads/Ep1.fcpxmld   # <- subtitles for the cut you made
+uv run splice reel new "1961" --from era:1960s   # seed from a suggestion
+uv run splice reel show 1961
+uv run splice reel export 1961                   # -> a Final Cut timeline
+uv run splice reel export 1961 -e resolve        # -> one Resolve can open
+uv run splice captions ~/Downloads/Ep1.fcpxmld   # <- subtitles for the cut you made
 ```
 
 ## Adding clips later
@@ -777,16 +777,16 @@ is running with a project open, so most syncs cannot see it at all — which
 changes nothing, because an editor that cannot be read leaves import state
 exactly as the sidecars have it.
 
-Set `GREELS_FCP_LIBRARY` if the Final Cut library lives somewhere other than
+Set `SPLICE_FCP_LIBRARY` if the Final Cut library lives somewhere other than
 the media root, or if you keep more than one bundle there. If the editor
-cannot be read at all, `sync` says so and leaves import state alone; `greels
+cannot be read at all, `sync` says so and leaves import state alone; `splice
 imported` then sets it by hand:
 
 ```bash
-uv run greels imported                      # everything analysed so far
-uv run greels imported --only lunch_conv    # or just some
-uv run greels imported --reset              # deleted the library, start over
-uv run greels imported --editor resolve     # the same, for the media pool
+uv run splice imported                      # everything analysed so far
+uv run splice imported --only lunch_conv    # or just some
+uv run splice imported --reset              # deleted the library, start over
+uv run splice imported --editor resolve     # the same, for the media pool
 ```
 
 **A clip you already imported and then changed** — by hand or by
@@ -816,7 +816,7 @@ content, not names:
 
 - **The same footage again**, under any name, while the original is still there
   — reported as a duplicate and otherwise ignored. Nothing is moved or deleted.
-- **A clip renamed in Finder** rather than by `greels rename` — the rename is
+- **A clip renamed in Finder** rather than by `splice rename` — the rename is
   adopted: sidecar, proxy, chunks and segment ids follow it, and the analysis is
   kept. Every name a clip has had is remembered, because Final Cut may still
   hold it under one of them.
@@ -830,9 +830,9 @@ A clip the camera named tells you nothing in Final Cut's browser next to
 `grandpa_young_hero_photo_1961`. Once analysed there is enough to fix that:
 
 ```bash
-uv run greels rename                                   # propose, dry run
-uv run greels rename --apply                           # take the proposals
-uv run greels rename --apply -s IMG_8768=grandpa_guessing_echo_show
+uv run splice rename                                   # propose, dry run
+uv run splice rename --apply                           # take the proposals
+uv run splice rename --apply -s IMG_8768=grandpa_guessing_echo_show
 ```
 
 It moves the original and everything pointing at it — sidecar, proxy, chunks,
@@ -852,13 +852,13 @@ other clip camera-numbered too.
 
 Proposals come from the longest segment, not the first: a short opening
 question ("Do you know what this is?") makes a poor filename. `sync` reindexes
-and re-exports for you; after a bare `rename --apply`, run `greels index` and
-`greels export all`.
+and re-exports for you; after a bare `rename --apply`, run `splice index` and
+`splice export all`.
 
 ## Related moments and reel suggestions
 
-`greels related <title fragment>` finds moments resembling one you name;
-`greels reels` proposes reels assembled from several source files.
+`splice related <title fragment>` finds moments resembling one you name;
+`splice reels` proposes reels assembled from several source files.
 
 Neither involves a model. Both start from the tags, but **not from raw tag
 overlap** — that does not work here. At 6.2 tags a segment, 87% of all segment pairs share
@@ -972,8 +972,8 @@ summaries and proposes stories, then reads the complete timestamped dialogue of
 the moments it picked plus neighbouring context. This archive's 192 summaries
 are 72 KB and go in one prompt; the limit is not the model's context but
 `ARG_MAX`, because the prompt reaches `agy` as a single argument. It never
-reanalyses the video. `GREELS_DRAFT_MODEL` overrides the drafting model; by default it uses
-`GREELS_AGY_MODEL`. No direct model API key is needed. Drafting sends the existing
+reanalyses the video. `SPLICE_DRAFT_MODEL` overrides the drafting model; by default it uses
+`SPLICE_AGY_MODEL`. No direct model API key is needed. Drafting sends the existing
 text to Gemini, so it is a model request even though the browser and files are local.
 
 The model selects supplied segment and line references. Python supplies the
@@ -1033,18 +1033,18 @@ A suggestion is a proposal that changes whenever the vocabulary does. A **cut**
 is a decision, and it is the only thing here nothing can regenerate.
 
 ```bash
-uv run greels reel new "1961" --from era:1960s   # from a suggestion
-uv run greels reel new "Money" --tag theme:money --rating favorite --order shot
-uv run greels reel add 1961 "young hero"         # a segment id or part of a title
-uv run greels reel add 1961 --search "old photo" # or everything a query finds
-uv run greels reel trim 1961 2 --start 5 --end 40
-uv run greels reel move 1961 3 1
-uv run greels reel order 1961 --by shot           # or long, short, clip
-uv run greels reel duplicate 1961 "1961, shorter" # try one without losing this
-uv run greels reel show 1961 --lines
-uv run greels reel export 1961                    # -> a Final Cut timeline
-uv run greels reel export 1961 --editor resolve   # -> one Resolve can open
-uv run greels reel render 1961                    # -> an mp4 you can watch
+uv run splice reel new "1961" --from era:1960s   # from a suggestion
+uv run splice reel new "Money" --tag theme:money --rating favorite --order shot
+uv run splice reel add 1961 "young hero"         # a segment id or part of a title
+uv run splice reel add 1961 --search "old photo" # or everything a query finds
+uv run splice reel trim 1961 2 --start 5 --end 40
+uv run splice reel move 1961 3 1
+uv run splice reel order 1961 --by shot           # or long, short, clip
+uv run splice reel duplicate 1961 "1961, shorter" # try one without losing this
+uv run splice reel show 1961 --lines
+uv run splice reel export 1961                    # -> a Final Cut timeline
+uv run splice reel export 1961 --editor resolve   # -> one Resolve can open
+uv run splice reel render 1961                    # -> an mp4 you can watch
 ```
 
 A search is usually the quickest way in: `--tag theme:money --rating favorite`
@@ -1157,8 +1157,8 @@ make and easy to miss.
 ### Snapping a cut onto speech
 
 ```bash
-uv run greels reel snap 1961 --dry-run    # what would move
-uv run greels reel snap 1961              # move it
+uv run splice reel snap 1961 --dry-run    # what would move
+uv run splice reel snap 1961              # move it
 ```
 
 Every shot in a cut starts life on a segment boundary, and those are the
@@ -1195,8 +1195,8 @@ that is a real case rather than a hypothetical one.
 ## Watching one back
 
 ```bash
-uv run greels reel render 1961              # -> export/reels/1961.mp4
-uv run greels reel render --all --stale     # everything that has moved since
+uv run splice reel render 1961              # -> export/reels/1961.mp4
+uv run splice reel render --all --stale     # everything that has moved since
 ```
 
 The browser plays a cut shot by shot with a beat at each join, which is enough
@@ -1237,11 +1237,11 @@ own buttons. `--lang both` puts the romanised Konkani above the English in a
 lighter weight.
 
 ```bash
-uv run greels reel render 1961 --from proxy       # 270x480, about a second
-uv run greels reel render 1961 --aspect 1:1       # 1080 out of the middle
-uv run greels reel render 1961 --bitrate 16M      # a master rather than a send
-uv run greels reel render money --fit             # small enough to send
-uv run greels reel render 1961 --lang both -o ~/Desktop/for-mum.mp4
+uv run splice reel render 1961 --from proxy       # 270x480, about a second
+uv run splice reel render 1961 --aspect 1:1       # 1080 out of the middle
+uv run splice reel render 1961 --bitrate 16M      # a master rather than a send
+uv run splice reel render money --fit             # small enough to send
+uv run splice reel render 1961 --lang both -o ~/Desktop/for-mum.mp4
 ```
 
 `--fit` is the other half of drawing the captions on. Five minutes at the
@@ -1277,7 +1277,7 @@ independently.
 
 ## Captioning a cut you made yourself
 
-`reel export` puts the spoken lines on a running order greels decided. This is
+`reel export` puts the spoken lines on a running order Splice decided. This is
 the other direction, and it is the one a finished episode actually needs: by
 the time a cut is done it has been argued with — b-roll cut in, a line lifted,
 eight shots taken off one clip, music laid under it — and it shares no timings
@@ -1285,11 +1285,11 @@ with the reel it started from. The first real episode here is 33.5 s against
 the 78.7 s of the reel behind it.
 
 ```bash
-uv run greels captions ~/Downloads/Ep1.fcpxmld          # -> ~/Downloads/Ep1.srt
-uv run greels captions ~/Downloads/Ep1.fcpxmld --titles # -> styled, as a project
-uv run greels captions ~/Downloads/Ep1.fcpxmld --by-speaker   # -> one .srt a voice
-uv run greels captions ~/Downloads/Ep1.fcpxmld --lang both --dry-run
-uv run greels captions ~/Downloads/Ep1.fcpxml --editor resolve
+uv run splice captions ~/Downloads/Ep1.fcpxmld          # -> ~/Downloads/Ep1.srt
+uv run splice captions ~/Downloads/Ep1.fcpxmld --titles # -> styled, as a project
+uv run splice captions ~/Downloads/Ep1.fcpxmld --by-speaker   # -> one .srt a voice
+uv run splice captions ~/Downloads/Ep1.fcpxmld --lang both --dry-run
+uv run splice captions ~/Downloads/Ep1.fcpxml --editor resolve
 ```
 
 **Which editor wrote the file is not asked, because it does not need to be.**
@@ -1341,7 +1341,7 @@ heavy type, white, a hard black outline, a soft shadow, sitting clear of
 Instagram's furniture — is a **title**.
 
 ```bash
-uv run greels captions ~/Downloads/Ep1.fcpxmld --titles
+uv run splice captions ~/Downloads/Ep1.fcpxmld --titles
 ```
 
 That writes `Ep1 captions.fcpxml`: **the project Final Cut exported, with the
@@ -1395,7 +1395,7 @@ existing code rather than a second implementation of it. That makes the round
 trip a test: export a cut, read it back, and the captions have to be the same
 ones, to the frame.
 
-Five things it handles because Final Cut writes all five and greels never
+Five things it handles because Final Cut writes all five and Splice never
 does — and every one of them was found by running it on a real export rather
 than by thinking about it. The hand-built tests all passed while the reader was
 producing 74 captions for a 16-caption cut.
@@ -1443,18 +1443,18 @@ edits, **reels** with chosen running orders and trims, and **plans** with
 their stages, the takes chosen for each and the order they go out in.
 Regeneration cannot recover those decisions.
 
-They are JSON mirrored into the folder `greels.yaml` names as its `archive:`,
+They are JSON mirrored into the folder `splice.yaml` names as its `archive:`,
 where git can keep the history of transcript corrections, draft revisions,
-reordered cuts and what was published. The project's own `greels.yaml`,
+reordered cuts and what was published. The project's own `splice.yaml`,
 `taxonomy.yaml`, prompts and plan seed go under its `project/`, since nothing
 else versions them either. Make it a git repository of its own and keep it
 **private**: it is everything anybody in the footage said. It belongs nowhere
 near the code, which is why it is not in this repository.
 
 ```bash
-uv run greels backup           # mirror sidecars, drafts, reels, plans and the project into the archive
-uv run greels backup --check   # what would change
-uv run greels backup --restore # copy them back over index/
+uv run splice backup           # mirror sidecars, drafts, reels, plans and the project into the archive
+uv run splice backup --check   # what would change
+uv run splice backup --restore # copy them back over index/
 ```
 
 The archive's `manifest.json` names the media root it was taken from, and a
@@ -1480,8 +1480,8 @@ delete, a transcript you overwrite, a draft, cut or plan you throw away, a live
 file a `--restore` displaces:
 
 ```bash
-uv run greels trash list
-uv run greels trash restore 20260905T1147   # puts one back
+uv run splice trash list
+uv run splice trash restore 20260905T1147   # puts one back
 ```
 
 Not every write: a rating or a status is a keystroke in Review, it happens
@@ -1509,7 +1509,7 @@ whenever it is asked for, which takes about 5 ms for 477 moments and 42 plans.
 
 The shortlist is the one thing left in the browser's `localStorage`, and
 clearing site data loses it. A starting series outline, if a project has one,
-is kept beside `greels.yaml` in `plans/schedule.json` and is only read.
+is kept beside `splice.yaml` in `plans/schedule.json` and is only read.
 
 Re-running `analyze` overwrites the model's output but **keeps** any `rating` or
 `status` you set, re-attached to whichever new segment covers the old midpoint.
@@ -1529,16 +1529,16 @@ library is not a clip in Resolve's media pool.
 ## Tags
 
 The project's `taxonomy.yaml` is the controlled vocabulary, and the people in
-`greels.yaml` are in it whether listed there or not; `fcp_label` is what shows up in
+`splice.yaml` are in it whether listed there or not; `fcp_label` is what shows up in
 Final Cut's keyword sidebar, and in Resolve's marker notes, which is the
 nearest thing it has. Tags the model invents are not discarded, they go to
 `proposed_tags` and stay out of the FCPXML until you accept them:
 
 ```bash
-uv run greels tags                          # what each tag covers, and what is quarantined
-uv run greels taxonomy promote theme:exams  # accept it
-uv run greels taxonomy alias theme:historical tone:historical   # or fold it in
-uv run greels reclassify && uv run greels index
+uv run splice tags                          # what each tag covers, and what is quarantined
+uv run splice taxonomy promote theme:exams  # accept it
+uv run splice taxonomy alias theme:historical tone:historical   # or fold it in
+uv run splice reclassify && uv run splice index
 ```
 
 Promoting is not the only answer. A proposed tag that duplicates one you have —
@@ -1559,8 +1559,8 @@ only because of the filters says how many moments match without them, with a
 button to show them all.
 
 ```bash
-uv run greels reel unused                 # favourites no cut has claimed
-uv run greels reel unused --rating any -t theme:money
+uv run splice reel unused                 # favourites no cut has claimed
+uv run splice reel unused --rating any -t theme:money
 ```
 
 A cut also remembers what it last handed over — its title, and each shot's clip,
@@ -1575,7 +1575,7 @@ timeline — and in Resolve they were never on the timeline at all, only in the
 update a project from XML any more than it can a clip: a re-export arrives as a
 second timeline, not an update.
 
-`greels tags` is the view worth checking now and then: it shows each tag's reach
+`splice tags` is the view worth checking now and then: it shows each tag's reach
 (segments and clips) and its **signal** — how much it narrows things down.
 `person:nikhil` covers 139 of 192 segments and scores 0.32; `object:router`
 covers 8 and scores 3.18. Low-signal tags are near-useless for finding
@@ -1620,7 +1620,7 @@ cost / rupees.
 - **Subtitle timings are estimated, not measured** — until you measure them.
   The model returns suspiciously round line times: 0.5, 4.0, 10.0, 12.5. Half a
   second out is enough for a caption to appear before the mouth moves.
-  `greels align` snaps every line to the nearest utterance the audio actually
+  `splice align` snaps every line to the nearest utterance the audio actually
   contains, within a second; across this archive that moves 285 of 1458 lines,
   by half a second each. It leaves segment *boundaries* alone on purpose:
   segment ids are derived from their start time, so moving one renumbers it,
@@ -1653,7 +1653,7 @@ cost / rupees.
   current prompt, and records per-chunk failures in the sidecar rather than
   swallowing them, so re-running retries only what broke.
 - **`raw/` is a drop bin.** Put anything in it — loose clips, or a whole folder
-  copied off a phone — and `greels scan` picks it up; discovery recurses. If the
+  copied off a phone — and `splice scan` picks it up; discovery recurses. If the
   same clip lands as both `X.MOV` and `X.mp4`, the original wins over the
   downscale. Non-video files are ignored, so stills can sit alongside.
 

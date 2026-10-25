@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-PAGE = Path(__file__).resolve().parents[1] / "src" / "greels" / "web" / "index.html"
+PAGE = Path(__file__).resolve().parents[1] / "src" / "splice" / "web" / "index.html"
 SCRIPT = re.compile(r"<script>(.*)</script>", re.S)
 STYLE = re.compile(r"<style>(.*)</style>", re.S)
 
@@ -54,7 +54,7 @@ def test_every_style_the_page_uses_is_one_it_defines():
 def test_the_server_serves_an_address_for_every_tab_and_no_other():
     """The tabs are listed twice, once in the page and once in the server,
     and a tab added to one alone reloads into a 404."""
-    from greels.server import PAGES
+    from splice.server import PAGES
 
     tabs = re.search(r"const TABS = \[([^\]]*)\]", _script()).group(1)
     assert {"/" + t.lower() for t in re.findall(r"'([^']+)'", tabs)} == PAGES

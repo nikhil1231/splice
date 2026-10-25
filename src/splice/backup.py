@@ -10,9 +10,9 @@ out, and in what order.
 
 All of it is small JSON, so version control is the obvious home, and a diff of a
 transcript correction or a re-ordered cut is worth having. The archive is a
-directory the project names (`archive:` in greels.yaml), meant to be a git
+directory the project names (`archive:` in splice.yaml), meant to be a git
 repository of its own and kept private: it is the footage's words, not code.
-The project's own greels.yaml, vocabulary and prompts are mirrored there too,
+The project's own splice.yaml, vocabulary and prompts are mirrored there too,
 under project/, because they are just as hand-made.
 """
 
@@ -37,11 +37,11 @@ class NoArchive(Refused):
 
 
 def archive_root() -> Path:
-    """Where the mirror lives: `GREELS_ARCHIVE`, else the project's `archive:`.
+    """Where the mirror lives: `SPLICE_ARCHIVE`, else the project's `archive:`.
 
     A mirror belongs to one media root: it deletes what its source does not
-    have, so a scratch `GREELS_ROOT` mirrored over the real archive is how you
-    lose it. A scratch root has no greels.yaml and so no archive, and the
+    have, so a scratch `SPLICE_ROOT` mirrored over the real archive is how you
+    lose it. A scratch root has no splice.yaml and so no archive, and the
     manifest's `media_root` stops one that borrowed somebody else's.
 
     Read at call time, not bound at import: a default argument would capture
@@ -188,7 +188,7 @@ def _check_owner(force: bool) -> None:
 
     The manifest says which root it was taken from. Mirroring deletes what the
     source lacks, so a second project pointed at the same archive -- a copied
-    greels.yaml is all it takes -- would prune the first one's transcripts.
+    splice.yaml is all it takes -- would prune the first one's transcripts.
     """
     manifest = archive_root() / "manifest.json"
     # An unmounted root is its own refusal, made by the mirror with a better

@@ -1,4 +1,4 @@
-"""greels — index family footage and hand it to an editor."""
+"""splice — index family footage and hand it to an editor."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ ONLY = typer.Option(None, "--only", "-o", help="Glob or substring over clip name
 
 
 def main() -> None:
-    """The `greels` command. A missing project is a sentence, not a traceback:
+    """The `splice` command. A missing project is a sentence, not a traceback:
     it is the first thing anybody new to this sees."""
     try:
         app()
@@ -40,10 +40,10 @@ def init(
     ),
     default: bool = typer.Option(
         True, "--default/--no-default",
-        help="Make this the project greels uses when run from anywhere else.",
+        help="Make this the project splice uses when run from anywhere else.",
     ),
 ):
-    """Start a project: a folder for the footage and a greels.yaml describing it."""
+    """Start a project: a folder for the footage and a splice.yaml describing it."""
     import shutil
 
     import yaml
@@ -69,13 +69,13 @@ def init(
         data = (yaml.safe_load(path.read_text()) or {}) if path.exists() else {}
         data["root"] = str(folder)
         path.write_text(yaml.safe_dump(data, sort_keys=False))
-        typer.echo(f"greels now uses {folder} by default ({path})")
+        typer.echo(f"splice now uses {folder} by default ({path})")
 
     typer.echo(
         "\nnext:\n"
         f"  1. fill in {settings}: what the footage is, its language, who is in it\n"
         f"  2. put footage in {folder / 'raw'}\n"
-        "  3. uv run greels doctor, then uv run greels sync\n"
+        "  3. uv run splice doctor, then uv run splice sync\n"
         f"\nthe default prompts are in {config.DEFAULTS_DIR / 'prompts'}; copy one "
         f"into {folder / 'prompts'} to change it for this project"
     )
@@ -84,7 +84,7 @@ def init(
 def _needs_index(exc: FileNotFoundError) -> "typer.Exit":
     """Turn a missing index into a sentence rather than a traceback.
 
-    Every one of these is one `greels index` away, and the message the index
+    Every one of these is one `splice index` away, and the message the index
     raises already says so. What it must not do is arrive as a stack trace on
     somebody's first run.
     """
@@ -282,7 +282,7 @@ def analyze(
         raise typer.Exit(1)
 
     if failed:
-        typer.echo(f"\n{failed} clip(s) failed; rerun `greels analyze` to retry just those")
+        typer.echo(f"\n{failed} clip(s) failed; rerun `splice analyze` to retry just those")
 
 
 def _carry_review_state(old: Sidecar, new: Sidecar) -> None:
@@ -319,7 +319,7 @@ def _carry_review_state(old: Sidecar, new: Sidecar) -> None:
 EDITOR = typer.Option(
     None, "--editor", "-e",
     help=f"Which editor to hand this to: {editors.names_for_help()}. "
-         "Defaults to $GREELS_EDITOR, or Final Cut.",
+         "Defaults to $SPLICE_EDITOR, or Final Cut.",
 )
 
 
@@ -503,8 +503,8 @@ def _mirror_into_repo() -> None:
 
     A sync of a project that names no archive does not back up at all: the
     archive mirrors one media root and deletes what that root does not have,
-    so an unasked-for backup of a scratch `GREELS_ROOT` into somebody's real
-    one is how the transcripts go. A scratch root has no greels.yaml, and so
+    so an unasked-for backup of a scratch `SPLICE_ROOT` into somebody's real
+    one is how the transcripts go. A scratch root has no splice.yaml, and so
     no archive.
     """
     from . import backup as store
@@ -559,7 +559,7 @@ def _report_reconcile(report, would: bool = False, editor=None) -> None:
         )
         typer.echo(
             f"\n! could not read the {which.label} library, so import state is "
-            "whatever the sidecars already said. `greels imported "
+            "whatever the sidecars already said. `splice imported "
             f"--editor {which.name}` sets it by hand.{extra}"
         )
         return
@@ -688,12 +688,12 @@ def imported(
     """Record by hand that the editor already holds these clips.
 
     `sync` reads the editor's own library, so this is only needed when it
-    cannot -- a Final Cut library kept somewhere greels cannot see, or a
+    cannot -- a Final Cut library kept somewhere splice cannot see, or a
     version whose catalogue it fails to read. For Resolve it is needed far more
     often, because Resolve answers only while it is running with the project
     open, and a sync at midnight cannot see a thing.
 
-    Setting `GREELS_FCP_LIBRARY` is usually the better answer for Final Cut.
+    Setting `SPLICE_FCP_LIBRARY` is usually the better answer for Final Cut.
     For Resolve the better answer is to have it open.
     """
     from .export_fcpxml import mark_exported
@@ -767,7 +767,7 @@ def rename_cmd(
         except RenameError as exc:
             typer.echo(f"! {plan.stem}: {exc}")
             raise typer.Exit(1)
-    typer.echo(f"\nrenamed {len(plans)} clip(s); run `greels index` and `greels export all`")
+    typer.echo(f"\nrenamed {len(plans)} clip(s); run `splice index` and `splice export all`")
 
 
 @app.command()
@@ -821,7 +821,7 @@ def backup(
             typer.echo(f"! {exc}")
             raise typer.Exit(1)
         typer.echo(f"restored {restored} file(s), {skipped} already identical")
-        typer.echo("run `greels index` to rebuild the search index")
+        typer.echo("run `splice index` to rebuild the search index")
         return
 
     try:
@@ -831,7 +831,7 @@ def backup(
         raise typer.Exit(1)
     except store.Refused as exc:
         typer.echo(f"! {exc}")
-        typer.echo("  nothing was changed. `greels backup --force` overrides this.")
+        typer.echo("  nothing was changed. `splice backup --force` overrides this.")
         raise typer.Exit(1)
     typer.echo(
         f"{added} added, {updated} updated, {removed} removed -> {store.archive_root()}"
@@ -861,12 +861,12 @@ def trash_list(limit: int = typer.Option(20, "--limit", "-n")):
         )
         typer.echo(f"{'':18}  {entry.name}")
     typer.echo(f"\n{len(kept)} copy(ies) in {trash.trash_dir()}")
-    typer.echo("  greels trash restore <name>   puts one back")
+    typer.echo("  splice trash restore <name>   puts one back")
 
 
 @trash_app.command("restore")
 def trash_restore(
-    name: str = typer.Argument(..., help="A name from `greels trash list`, or part of one."),
+    name: str = typer.Argument(..., help="A name from `splice trash list`, or part of one."),
 ):
     """Put a kept copy back over the live file.
 
@@ -888,7 +888,7 @@ def trash_restore(
 
     destination = trash.restore(matches[0])
     typer.echo(f"restored {matches[0].name}\n  -> {destination}")
-    typer.echo("run `greels index` to rebuild the search index")
+    typer.echo("run `splice index` to rebuild the search index")
 
 
 @trash_app.command("empty")
@@ -967,7 +967,7 @@ def search(
     """Find moments across every clip.
 
     The same filters the browser's facets apply, so a query you refine there
-    can be handed straight to `greels reel add --search`.
+    can be handed straight to `splice reel add --search`.
     """
     from .index import search as run
 
@@ -1007,7 +1007,7 @@ def search(
             # the reason `lines` exists, and this row should say so.
             typer.echo(
                 f"{'':40} and {len(row['said']) - _SAID_SHOWN} more here — "
-                f"`greels lines` lists them"
+                f"`splice lines` lists them"
             )
         detail = row["tags"] or ""
         if row["reels"]:
@@ -1060,7 +1060,7 @@ def lines(
         f"\n{len(rows)} line(s)" if len(rows) < limit
         else f"\nthe first {limit}; -n asks for more"
     )
-    typer.echo("  greels reel add <slug> --line '<phrase>'   puts one in a cut")
+    typer.echo("  splice reel add <slug> --line '<phrase>'   puts one in a cut")
 
 
 @app.command()
@@ -1138,7 +1138,7 @@ def tags(
             counts[tag] = (len(members), len({s.stem for s in members}))
     except FileNotFoundError:
         indexed = False
-        typer.echo("(no index yet -- run `greels index` for usage counts)\n")
+        typer.echo("(no index yet -- run `splice index` for usage counts)\n")
 
     for sidecar in library.load_all():
         for segment in sidecar.segments:
@@ -1150,7 +1150,7 @@ def tags(
         names = [t for t in names if t.startswith(f"{namespace.rstrip(':')}:")]
     if unused:
         if not indexed:
-            typer.echo("! --unused needs an index; run `greels index` first")
+            typer.echo("! --unused needs an index; run `splice index` first")
             raise typer.Exit(1)
         names = [t for t in names if not counts.get(t, (0, 0))[0]]
 
@@ -1215,7 +1215,7 @@ def reels(
     if tag:
         suggestions = [r for r in suggestions if r.tag == tag or r.title.lower() == tag.lower()]
         if not suggestions:
-            typer.echo(f"no reel suggestion for {tag!r}; run `greels reels` to see them")
+            typer.echo(f"no reel suggestion for {tag!r}; run `splice reels` to see them")
             raise typer.Exit(1)
 
     for reel in suggestions:
@@ -1231,7 +1231,7 @@ def reels(
                 f"{segment.stem[:30]} {_hms(segment.start)}"
             )
     if not tag and suggestions:
-        typer.echo("\n* = tagged reel_candidate.  greels reels --tag <tag> for one in full")
+        typer.echo("\n* = tagged reel_candidate.  splice reels --tag <tag> for one in full")
 
 
 @app.command()
@@ -1260,12 +1260,12 @@ def serve(
         typer.echo(f"! cannot listen on {port}: {exc}")
         raise typer.Exit(1)
 
-    typer.echo(f"greels on {url}   (ctrl-c to stop)")
+    typer.echo(f"splice on {url}   (ctrl-c to stop)")
     typer.echo("edits write straight back to the sidecars")
     typer.echo(
         f"they are mirrored into archive/ {delay:.0f}s after you stop typing, "
         "and on the way out" if delay else
-        "autosave is off; run `greels backup` before you commit"
+        "autosave is off; run `splice backup` before you commit"
     )
     if open_browser:
         webbrowser.open(url)
@@ -1475,7 +1475,7 @@ def status(editor: str = EDITOR):
     if proposed:
         typer.echo(f"\nproposed tags ({len(proposed)}) awaiting review:")
         for tag, count in sorted(proposed.items(), key=lambda kv: -kv[1]):
-            typer.echo(f"  {tag:34} x{count}   -> greels taxonomy promote {tag}")
+            typer.echo(f"  {tag:34} x{count}   -> splice taxonomy promote {tag}")
     typer.echo(f"\nvocabulary : {len(taxonomy.tags)} tags")
 
 
@@ -1567,7 +1567,7 @@ def taxonomy_promote(
         typer.echo(f"! {exc}")
         raise typer.Exit(1)
     typer.echo(f"promoted {promoted} -> \"{taxonomy.label(promoted)}\"")
-    typer.echo("run `greels reclassify` to move it out of proposed_tags, then `greels index`")
+    typer.echo("run `splice reclassify` to move it out of proposed_tags, then `splice index`")
 
 
 @taxonomy_app.command("alias")
@@ -1585,7 +1585,7 @@ def taxonomy_alias(
         typer.echo(f"! {exc}")
         raise typer.Exit(1)
     typer.echo(f"{source} now folds into {resolved}")
-    typer.echo("run `greels reclassify`, then `greels index`")
+    typer.echo("run `splice reclassify`, then `splice index`")
 
 
 @app.command()
@@ -1630,7 +1630,7 @@ def captions(
 ):
     """Caption a cut you assembled by hand, in either editor.
 
-    `reel export` captions a running order greels itself decided. This is for
+    `reel export` captions a running order splice itself decided. This is for
     the other direction: once the cut has been argued with -- b-roll cut in, a
     line lifted, music under it -- its timings no longer resemble the reel's,
     and the translations still have to land on it.
@@ -1806,7 +1806,7 @@ def _selected(only: str | None, strict: bool = True) -> list[Sidecar]:
     if not sidecars:
         if not strict:
             return []
-        typer.echo("no sidecars yet; run `greels scan` first")
+        typer.echo("no sidecars yet; run `splice scan` first")
         raise typer.Exit(1)
     if only:
         wanted = set(library.match([sc.asset.stem for sc in sidecars], only))

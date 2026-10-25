@@ -83,7 +83,7 @@ WHITE = "1 1 1 1"
 
 
 def speaker_colours() -> dict[str, str]:
-    """One title colour per voice, from greels.yaml.
+    """One title colour per voice, from splice.yaml.
 
     Worth keeping pale and high-value rather than saturated: captions sit over
     lit kitchens and white clothes, where a mid-toned colour disappears. And

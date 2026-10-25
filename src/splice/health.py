@@ -5,7 +5,7 @@ depends on are where they should be -- the question after a laptop change, an
 OS upgrade, or a drive that did not mount.
 
 It produces checks rather than printing them, because there are two places
-that ask. `greels doctor` renders them as lines; the browser draws the ones
+that ask. `splice doctor` renders them as lines; the browser draws the ones
 that are not `ok` in its header, which is where they are actually read: the
 evenings happen in the browser, and a warning only a terminal shows is a
 warning nobody sees. A drive that did not mount should not have to be noticed
@@ -144,8 +144,8 @@ def checkup(editor=None) -> Report:
 
         if not bridge.installed():
             report.add("tools", "Resolve scripting API",
-                       "not found; greels cannot see the media pool or send a "
-                       "timeline. `greels imported --editor resolve` sets "
+                       "not found; splice cannot see the media pool or send a "
+                       "timeline. `splice imported --editor resolve` sets "
                        "delivery by hand", NOTE)
         elif bridge.connect() is None:
             # The ordinary case rather than a fault: Resolve answers only while
@@ -203,10 +203,10 @@ def checkup(editor=None) -> Report:
     if len(clips) > len(sidecars):
         report.add("storage", "scanning",
                    f"{len(clips) - len(sidecars)} clip(s) in raw/ have no sidecar; "
-                   "run `greels scan`", NOTE, fix="sync")
+                   "run `splice scan`", NOTE, fix="sync")
 
     if not config.db_path().exists():
-        report.add("derived", "index", "no library.sqlite; run `greels index`",
+        report.add("derived", "index", "no library.sqlite; run `splice index`",
                    NOTE, fix="index")
     else:
         try:
@@ -219,7 +219,7 @@ def checkup(editor=None) -> Report:
             if indexed != live:
                 report.add("derived", "index",
                            f"holds {indexed} segments, the sidecars have {live}; "
-                           "run `greels index`", NOTE, fix="index")
+                           "run `splice index`", NOTE, fix="index")
             else:
                 report.add("derived", "index", f"{indexed} segments, current")
         except Exception as exc:
@@ -229,7 +229,7 @@ def checkup(editor=None) -> Report:
         off = lines_off_the_speech(sidecars)
         if off:
             report.add("derived", "subtitles",
-                       f"{off} line timing(s) sit off the speech; `greels align`",
+                       f"{off} line timing(s) sit off the speech; `splice align`",
                        NOTE, fix="align")
         else:
             report.add("derived", "subtitles",
@@ -244,7 +244,7 @@ def checkup(editor=None) -> Report:
             # one place. Worth more than a note once it is transcripts.
             report.add("derived", "backup",
                        f"{len(fresh)} new, {len(differing)} changed, "
-                       f"{len(only_saved)} stale; run `greels backup`", NOTE,
+                       f"{len(only_saved)} stale; run `splice backup`", NOTE,
                        fix="backup")
         else:
             report.add("derived", "backup", "current")

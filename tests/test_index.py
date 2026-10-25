@@ -2,14 +2,14 @@
 
 import pytest
 
-from greels import config, index, library as library_module
-from greels.schema import Asset, Line, Segment, Sidecar
-from greels.taxonomy import Taxonomy, normalise
+from splice import config, index, library as library_module
+from splice.schema import Asset, Line, Segment, Sidecar
+from splice.taxonomy import Taxonomy, normalise
 
 
 @pytest.fixture
 def library(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     asset = Asset(file="a.MOV", stem="a", duration=40, fps="30", width=1080, height=1920)
     Sidecar(
         asset=asset,
@@ -70,7 +70,7 @@ def test_a_cut_survives_a_rebuild(library):
     These rows used to be the one thing `build` had to carry across, which made
     SQLite a second writable store for exactly one kind of row.
     """
-    from greels import reel as store
+    from splice import reel as store
 
     store.create("What things used to cost", shots=[
         store.Shot(stem="a", start=0.0, end=27.0, segment_id="a#0"),
@@ -156,7 +156,7 @@ def test_aliasing_does_not_duplicate_an_existing_tag(tmp_path):
 
 
 def test_label_falls_back_for_a_tag_outside_the_vocabulary(tmp_path):
-    """`greels tags` lists tags in use as well as tags defined, so it must be
+    """`splice tags` lists tags in use as well as tags defined, so it must be
     able to name one that has not been promoted yet."""
     path = tmp_path / "taxonomy.yaml"
     path.write_text("namespaces: [object]\ntags: {}\n")
@@ -170,7 +170,7 @@ def test_label_falls_back_for_a_tag_outside_the_vocabulary(tmp_path):
 def three_clips(tmp_path, monkeypatch):
     """Three clips whose alphabetical order is the reverse of their shot order,
     and whose best material was shot last."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     for stem, created, tags in (
         ("a_broll", "2026-01-03", ["quality:broll", "quality:silent"]),
         ("b_talk", "2026-01-02", ["tone:funny"]),
@@ -204,7 +204,7 @@ def test_promise_puts_what_the_model_thought_worth_using_first(three_clips):
 
 
 def test_promise_beats_the_shot_order_it_falls_back_to(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     for stem, created, tags in (
         ("early_broll", "2026-01-01", ["quality:broll"]),
         ("late_gold", "2026-01-09", ["quality:reel_candidate"]),
@@ -231,7 +231,7 @@ def test_an_unknown_order_is_refused_rather_than_silently_alphabetical(three_cli
 def interview(tmp_path, monkeypatch):
     """One long clip, the shape the two real interviews are: a couple of
     two-minute segments with a dozen utterances inside each."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     Sidecar(
         asset=Asset(file="i.MOV", stem="i", duration=1200, fps="30"),
         segments=[
@@ -324,7 +324,7 @@ def test_a_rebuild_never_leaves_the_index_missing(library):
     another tab while the old file was gone found no database at all."""
     import threading
 
-    from greels import config
+    from splice import config
 
     seen = []
     stop = threading.Event()
@@ -346,7 +346,7 @@ def test_a_rebuild_never_leaves_the_index_missing(library):
 def test_a_rebuild_leaves_nothing_beside_the_index(library):
     """A second file that has to arrive at the same instant as the first is a
     second file that can be read against the wrong one."""
-    from greels import config
+    from splice import config
 
     index.build()
     beside = [
@@ -358,7 +358,7 @@ def test_a_rebuild_leaves_nothing_beside_the_index(library):
 
 def test_a_stale_write_ahead_log_is_cleared_out(library):
     """Left by the versions of this that ran in WAL mode."""
-    from greels import config
+    from splice import config
 
     (config.index_dir() / "library.sqlite-wal").write_bytes(b"from before")
     index.build()

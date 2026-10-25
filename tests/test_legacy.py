@@ -5,7 +5,7 @@ record of what is in each clip, and feeding it back means a new pass starts
 from what was already found. Forty clips of this archive have an entry.
 """
 
-from greels import config, legacy
+from splice import config, legacy
 
 LOG = """\
 # Video logs
@@ -55,6 +55,6 @@ def test_anything_before_the_first_heading_is_ignored(tmp_path):
 
 
 def test_no_log_is_no_hints_rather_than_an_error(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     assert legacy.parse() == {}
     assert legacy.parse(config.legacy_log_path()) == {}

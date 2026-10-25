@@ -10,7 +10,7 @@ Studio feature.
 So `imported_clips` here returns `None` far more often than Final Cut's does,
 and that is not a degradation to work around: everything downstream already
 treats `None` as "trust what the sidecars say and change nothing", which is
-exactly right for an editor nobody has opened yet. `greels imported --editor
+exactly right for an editor nobody has opened yet. `splice imported --editor
 resolve` is the escape hatch, the same as it always was.
 
 Nothing here writes to a project unless it is asked to. `import_timeline` is

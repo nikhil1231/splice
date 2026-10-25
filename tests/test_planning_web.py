@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-PAGE = Path(__file__).resolve().parents[1] / 'src/greels/web/index.html'
+PAGE = Path(__file__).resolve().parents[1] / 'src/splice/web/index.html'
 
 
 def _script() -> str:
@@ -148,7 +148,7 @@ def test_every_state_has_an_icon_and_every_stage_a_colour_of_its_own_or_a_state_
                                                        script.index('function stateBadge(')], re.M))
     css = PAGE.read_text()
 
-    from greels import plans
+    from splice import plans
     looks = {colour for _, colour in stages}
     assert set(states) == set(plans.STATES)
     assert icons == set(states) | looks

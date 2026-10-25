@@ -10,14 +10,14 @@ from pathlib import Path
 
 import pytest
 
-from greels import config, export_reel, reel as store, render
-from greels.reel import Reel, Shot
-from greels.schema import Asset, Line, Segment, Sidecar
+from splice import config, export_reel, reel as store, render
+from splice.reel import Reel, Shot
+from splice.schema import Asset, Line, Segment, Sidecar
 
 
 @pytest.fixture(autouse=True)
 def root(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     (tmp_path / "index").mkdir()
     (tmp_path / "raw").mkdir()
     return tmp_path
@@ -313,7 +313,7 @@ def test_a_card_stops_when_its_line_does(footage, tmp_path):
 
 
 def test_burning_with_nothing_to_draw_with_says_what_to_do_instead(footage, monkeypatch):
-    from greels import captions
+    from splice import captions
 
     monkeypatch.setattr(captions, "available", lambda: False)
     reel = _reel(Shot(stem="a", start=0, end=10), slug="test")

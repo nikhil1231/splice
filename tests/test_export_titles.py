@@ -16,8 +16,8 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from greels import export_reel, export_titles, import_fcpxml
-from greels.schema import Asset, Line, Segment, Sidecar
+from splice import export_reel, export_titles, import_fcpxml
+from splice.schema import Asset, Line, Segment, Sidecar
 
 
 @pytest.fixture

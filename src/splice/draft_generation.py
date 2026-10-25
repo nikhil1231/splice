@@ -77,7 +77,7 @@ def ask(instruction, data, schema, key):
     prompt = template() + "\n" + instruction + "\nDATA:\n" + encoded(data)
     if len(prompt.encode()) > config.DRAFT_PROMPT_CHARS:
         raise ValueError("Selected dialogue exceeds the drafting budget. Choose fewer moments.")
-    with tempfile.TemporaryDirectory(prefix="greels-draft-") as work:
+    with tempfile.TemporaryDirectory(prefix="splice-draft-") as work:
         path = Path(work) / "schema.json"
         path.write_text(json.dumps(flat_schema(schema)))
         for attempt in range(config.AGY_RETRIES + 1):

@@ -68,7 +68,7 @@ class Taxonomy:
         data = yaml.safe_load(_source(path).read_text()) or {}
         namespaces = list(data.get("namespaces", []))
         tags = dict(data.get("tags", {}) or {})
-        # The people in greels.yaml are vocabulary whether or not anybody wrote
+        # The people in splice.yaml are vocabulary whether or not anybody wrote
         # them in here too: one list of who is in the footage, not two.
         for person in config.project().people:
             tags.setdefault(f"person:{person.id}", {"fcp_label": person.label})

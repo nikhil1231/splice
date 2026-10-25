@@ -1,4 +1,4 @@
-# greels project settings. Everything here has a default; change what fits.
+# splice project settings. Everything here has a default; change what fits.
 # The prompts read these, so the model knows what it is looking at.
 
 # The Final Cut event / Resolve bin the clips go into, and the name of the
@@ -16,7 +16,7 @@ language: ""
 # "romanised Konkani" for a language whose own script nobody will read.
 transcription: ""
 
-# Where `greels backup` (and the browser, 90 s after an edit) mirrors the
+# Where `splice backup` (and the browser, 90 s after an edit) mirrors the
 # transcripts, cuts, plans and these settings. Make it a private git repo.
 # Relative paths are from this folder.
 archive: archive
@@ -41,5 +41,5 @@ people: []
 #    name: Me
 #    camera: true        # holding the camera and asking the questions
 
-# To change a prompt, copy it from greels' defaults into prompts/ here
-# (`greels init` tells you where they are) and edit the copy.
+# To change a prompt, copy it from splice' defaults into prompts/ here
+# (`splice init` tells you where they are) and edit the copy.

@@ -6,7 +6,7 @@ merged as seconds, the clip's later lines fall past its end and the next
 chunk's real minutes are thrown away as duplicates.
 """
 
-from greels.analyze import clock_to_seconds, reads_as_a_clock
+from splice.analyze import clock_to_seconds, reads_as_a_clock
 
 
 def answer(*spans):

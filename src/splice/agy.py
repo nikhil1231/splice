@@ -48,7 +48,7 @@ def run_structured(
         names = ", ".join(sorted({d.get("action", "?") for d in denied}))
         raise AnalysisError(
             f"agy was denied the {names} tool, so it never read the video. "
-            "Allow it in agy's settings.json or leave GREELS_AGY_SKIP_PERMISSIONS on."
+            "Allow it in agy's settings.json or leave SPLICE_AGY_SKIP_PERMISSIONS on."
         )
 
     if payload.get("status") != "SUCCESS":

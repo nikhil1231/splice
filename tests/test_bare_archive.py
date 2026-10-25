@@ -8,13 +8,13 @@ derived. Neither should produce a stack trace.
 import pytest
 import typer
 
-from greels import cli, cli_reel
+from splice import cli, cli_reel
 
 
 @pytest.fixture
 def bare(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.delenv("GREELS_FCP_LIBRARY", raising=False)
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.delenv("SPLICE_FCP_LIBRARY", raising=False)
     return tmp_path
 
 

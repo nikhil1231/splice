@@ -1,5 +1,5 @@
-# A starting vocabulary. `greels taxonomy promote` grows it; edit freely.
-# person: tags come from the people in greels.yaml and need not be listed.
+# A starting vocabulary. `splice taxonomy promote` grows it; edit freely.
+# person: tags come from the people in splice.yaml and need not be listed.
 aliases:
   theme:historical: tone:historical
   theme:history: tone:historical

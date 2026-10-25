@@ -1,7 +1,7 @@
 """An FCPXML project -> the shots it is made of.
 
 Everything else here writes FCPXML. This reads it, and it exists because a cut
-assembled by hand in Final Cut is not a `.reel.json`: the captions greels can
+assembled by hand in Final Cut is not a `.reel.json`: the captions splice can
 build from a reel are timed for the reel's own running order, and an edit with
 b-roll cut into it, music under it and eight shots off one clip shares no
 timings with that at all.
@@ -474,7 +474,7 @@ def read(source: Path | str, sidecars: list[Sidecar] | None = None) -> TimelineC
 
     Footage the archive has never seen -- music, a title card, a clip imported
     straight into Final Cut -- is not an error. It is listed and left alone,
-    because a reel scored with a track greels does not know about is the normal
+    because a reel scored with a track splice does not know about is the normal
     case, not a broken one.
     """
     found, project = placements(source)

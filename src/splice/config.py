@@ -1,16 +1,16 @@
 """Paths, the project, and tunables.
 
 A *project* is one archive: a media root holding the footage and everything
-derived from it, and a `greels.yaml` in it saying what that footage is -- who
+derived from it, and a `splice.yaml` in it saying what that footage is -- who
 is in it, what they speak, where the backup goes. The code knows nothing about
-any one family; that file does, and `greels init` writes a starting one.
+any one family; that file does, and `splice init` writes a starting one.
 
 Which project is found, first match wins:
 
-1. `GREELS_ROOT`, for tests, scripts and a second archive;
-2. the nearest directory above the current one holding a `greels.yaml`, the
+1. `SPLICE_ROOT`, for tests, scripts and a second archive;
+2. the nearest directory above the current one holding a `splice.yaml`, the
    way git finds a repository;
-3. `root:` in the user's own `~/.config/greels/config.yaml`, which `greels
+3. `root:` in the user's own `~/.config/splice/config.yaml`, which `splice
    init` fills in, so the browser can be started from anywhere.
 """
 
@@ -27,7 +27,7 @@ PACKAGE_DIR = Path(__file__).resolve().parent
 # The prompts and vocabulary a project starts from. A project's own copy, when
 # it has one, wins; these are what is used until it does.
 DEFAULTS_DIR = PACKAGE_DIR / "defaults"
-PROJECT_FILE = "greels.yaml"
+PROJECT_FILE = "splice.yaml"
 
 
 class NoProject(RuntimeError):
@@ -37,7 +37,7 @@ class NoProject(RuntimeError):
 
 def user_config_path() -> Path:
     base = os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config"
-    return Path(base).expanduser() / "greels" / "config.yaml"
+    return Path(base).expanduser() / "splice" / "config.yaml"
 
 
 def _read_yaml(path: Path) -> dict:
@@ -51,7 +51,7 @@ def _read_yaml(path: Path) -> dict:
 
 
 def default_root() -> Path | None:
-    """The project `greels init` last made the default, if any."""
+    """The project `splice init` last made the default, if any."""
     path = user_config_path()
     if not path.is_file():
         return None
@@ -60,7 +60,7 @@ def default_root() -> Path | None:
 
 
 def media_root() -> Path:
-    override = os.environ.get("GREELS_ROOT")
+    override = os.environ.get("SPLICE_ROOT")
     if override:
         return Path(override).expanduser()
     here = Path.cwd()
@@ -71,8 +71,8 @@ def media_root() -> Path:
     if root is not None:
         return root
     raise NoProject(
-        "No greels project found. Run `greels init <folder>` to make one, "
-        "run greels from inside a folder holding a greels.yaml, or set GREELS_ROOT."
+        "No splice project found. Run `splice init <folder>` to make one, "
+        "run splice from inside a folder holding a splice.yaml, or set SPLICE_ROOT."
     )
 
 
@@ -110,7 +110,7 @@ def fcp_library() -> Path | None:
     Unset is the normal case: the single bundle sitting in the media root is
     found by discovery. This is the escape hatch for a library kept elsewhere.
     """
-    override = os.environ.get("GREELS_FCP_LIBRARY")
+    override = os.environ.get("SPLICE_FCP_LIBRARY")
     return Path(override).expanduser() if override else None
 
 
@@ -151,7 +151,7 @@ class Person(BaseModel):
 
 
 class Project(BaseModel):
-    """What one archive is. Every field has a default, so an empty greels.yaml
+    """What one archive is. Every field has a default, so an empty splice.yaml
     -- or none at all -- is a project about nobody in particular."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -167,7 +167,7 @@ class Project(BaseModel):
     # Konkani" for a language whose own script nobody will read.
     transcription: str = ""
     people: list[Person] = Field(default_factory=list)
-    # Where `greels backup` mirrors the irreplaceable files. Relative paths
+    # Where `splice backup` mirrors the irreplaceable files. Relative paths
     # are from the media root. Unset means no backup is taken.
     archive: str = ""
 
@@ -192,16 +192,16 @@ class Project(BaseModel):
 
 
 def project_path() -> Path:
-    """The greels.yaml in use. `GREELS_CONFIG` names one directly, which is how
+    """The splice.yaml in use. `SPLICE_CONFIG` names one directly, which is how
     the tests stand in a cast of their own without a media root to hold it."""
-    override = os.environ.get("GREELS_CONFIG")
+    override = os.environ.get("SPLICE_CONFIG")
     if override:
         return Path(override).expanduser()
     return media_root() / PROJECT_FILE
 
 
 def project_dir() -> Path:
-    """Where the project's own taxonomy and prompts sit, beside greels.yaml."""
+    """Where the project's own taxonomy and prompts sit, beside splice.yaml."""
     return project_path().parent
 
 
@@ -210,11 +210,11 @@ def _load_project(path: str, stamp: int) -> Project:
     try:
         return Project.model_validate(_read_yaml(Path(path)))
     except ValidationError as exc:
-        raise NoProject(f"{path} has a setting greels does not understand:\n{exc}") from None
+        raise NoProject(f"{path} has a setting splice does not understand:\n{exc}") from None
 
 
 def project() -> Project:
-    """The project, re-read whenever greels.yaml changes on disk.
+    """The project, re-read whenever splice.yaml changes on disk.
 
     Asked for once per transcript line in places, so it is cached on the
     file's modification time rather than parsed every time.
@@ -239,8 +239,8 @@ def export_stem() -> str:
 
 
 def archive_dir() -> Path | None:
-    """Where the backup goes: `GREELS_ARCHIVE`, else the project's `archive:`."""
-    override = os.environ.get("GREELS_ARCHIVE")
+    """Where the backup goes: `SPLICE_ARCHIVE`, else the project's `archive:`."""
+    override = os.environ.get("SPLICE_ARCHIVE")
     if override:
         return Path(override).expanduser()
     configured = project().archive
@@ -303,7 +303,7 @@ def fill_prompt(template: str, p: Project | None = None) -> str:
 
 
 def schedule_seed_path() -> Path:
-    """A series plan written outside greels, offered to the browser as a
+    """A series plan written outside splice, offered to the browser as a
     starting point for the plans board."""
     return project_dir() / "plans" / "schedule.json"
 
@@ -343,9 +343,9 @@ CHUNK_OVERLAP = 5.0
 
 # --- agy ---------------------------------------------------------------
 
-AGY_BIN = os.environ.get("GREELS_AGY_BIN", "agy")
-AGY_MODEL = os.environ.get("GREELS_AGY_MODEL", "gemini-3.1-pro-high")
-DRAFT_MODEL = os.environ.get("GREELS_DRAFT_MODEL", AGY_MODEL)
+AGY_BIN = os.environ.get("SPLICE_AGY_BIN", "agy")
+AGY_MODEL = os.environ.get("SPLICE_AGY_MODEL", "gemini-3.1-pro-high")
+DRAFT_MODEL = os.environ.get("SPLICE_DRAFT_MODEL", AGY_MODEL)
 # The prompt is a single argv string to agy, so the ceiling is ARG_MAX and not
 # the model's context. Measured here: one argument of 1,043,707 bytes execs, and
 # 400,000 still execs beside a 500 KB environment. All 192 summaries are 72 KB
@@ -353,13 +353,13 @@ DRAFT_MODEL = os.environ.get("GREELS_DRAFT_MODEL", AGY_MODEL)
 # in one prompt. At 48,000 it took two, and two batches of candidates have to be
 # reduced to three -- which is a step that could throw a good story away.
 DRAFT_PROMPT_CHARS = 400000
-AGY_TIMEOUT = os.environ.get("GREELS_AGY_TIMEOUT", "20m")
+AGY_TIMEOUT = os.environ.get("SPLICE_AGY_TIMEOUT", "20m")
 # Wall-clock ceiling for one subprocess, generously above AGY_TIMEOUT.
 AGY_SUBPROCESS_TIMEOUT = 1500
 AGY_RETRIES = 2
 # agy auto-denies read_file in headless mode and a project-local
 # .antigravity/settings.json is not consulted, so the flag is the only way in
 # short of editing the user's global agy config. Set to 0 if allow-rules exist.
-AGY_SKIP_PERMISSIONS = os.environ.get("GREELS_AGY_SKIP_PERMISSIONS", "1") != "0"
+AGY_SKIP_PERMISSIONS = os.environ.get("SPLICE_AGY_SKIP_PERMISSIONS", "1") != "0"
 DEFAULT_JOBS = 3
 

@@ -9,12 +9,12 @@ gets that language.
 
 import pytest
 
-from greels import captions
+from splice import captions
 
 
 @pytest.fixture(autouse=True)
 def root(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     return tmp_path
 
 

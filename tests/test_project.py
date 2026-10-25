@@ -1,4 +1,4 @@
-"""What one archive is: greels.yaml, and how greels finds it.
+"""What one archive is: splice.yaml, and how splice finds it.
 
 The code used to know one family -- a media root under ~/Movies, four
 speakers, Konkani in the schema. All of that now comes from the project, and
@@ -13,13 +13,13 @@ from pathlib import Path
 
 import pytest
 
-from greels import analyze, backup, cli, config, schema
-from greels.taxonomy import Taxonomy
+from splice import analyze, backup, cli, config, schema
+from splice.taxonomy import Taxonomy
 
 
 def _no_project_hints(monkeypatch, tmp_path):
-    monkeypatch.delenv("GREELS_ROOT", raising=False)
-    monkeypatch.delenv("GREELS_CONFIG", raising=False)
+    monkeypatch.delenv("SPLICE_ROOT", raising=False)
+    monkeypatch.delenv("SPLICE_CONFIG", raising=False)
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
     monkeypatch.chdir(tmp_path)
 
@@ -27,17 +27,17 @@ def _no_project_hints(monkeypatch, tmp_path):
 # --- finding it --------------------------------------------------------
 
 
-def test_with_no_project_anywhere_greels_says_so_rather_than_guessing(tmp_path, monkeypatch):
+def test_with_no_project_anywhere_splice_says_so_rather_than_guessing(tmp_path, monkeypatch):
     """A guessed folder is where a first run scatters raw/ and index/."""
     _no_project_hints(monkeypatch, tmp_path)
-    with pytest.raises(config.NoProject, match="greels init"):
+    with pytest.raises(config.NoProject, match="splice init"):
         config.media_root()
 
 
-def test_a_greels_yaml_above_the_working_directory_is_the_project(tmp_path, monkeypatch):
+def test_a_splice_yaml_above_the_working_directory_is_the_project(tmp_path, monkeypatch):
     """The way git finds a repository: run it from anywhere inside."""
     _no_project_hints(monkeypatch, tmp_path)
-    (tmp_path / "greels.yaml").write_text("name: Holiday\n")
+    (tmp_path / "splice.yaml").write_text("name: Holiday\n")
     inside = tmp_path / "raw" / "phone"
     inside.mkdir(parents=True)
     monkeypatch.chdir(inside)
@@ -56,27 +56,27 @@ def test_init_makes_a_project_and_the_default_and_never_overwrites_one(tmp_path,
     assert config.project().name == "Footage"
 
     # Somebody's description of their family is not ours to reset.
-    (folder / "greels.yaml").write_text("name: Mine\n")
+    (folder / "splice.yaml").write_text("name: Mine\n")
     cli.init(folder=folder, default=True)
-    assert (folder / "greels.yaml").read_text() == "name: Mine\n"
+    assert (folder / "splice.yaml").read_text() == "name: Mine\n"
 
 
 def test_a_misspelt_setting_is_refused_rather_than_ignored(monkeypatch, tmp_path):
     """`peoples:` silently ignored is a project about nobody, analysed for
     hours before anybody notices the speakers are all unknown."""
-    path = tmp_path / "greels.yaml"
+    path = tmp_path / "splice.yaml"
     path.write_text("peoples: []\n")
-    monkeypatch.setenv("GREELS_CONFIG", str(path))
+    monkeypatch.setenv("SPLICE_CONFIG", str(path))
     with pytest.raises(config.NoProject, match="peoples"):
         config.project()
 
 
-def test_an_edit_to_greels_yaml_is_seen_without_a_restart(monkeypatch, tmp_path):
+def test_an_edit_to_splice_yaml_is_seen_without_a_restart(monkeypatch, tmp_path):
     """The server runs for an evening; the project is cached on mtime, not
     for the life of the process."""
-    path = tmp_path / "greels.yaml"
+    path = tmp_path / "splice.yaml"
     path.write_text("name: One\n")
-    monkeypatch.setenv("GREELS_CONFIG", str(path))
+    monkeypatch.setenv("SPLICE_CONFIG", str(path))
     assert config.event_name() == "One"
     path.write_text("name: Two\n")
     import os
@@ -114,7 +114,7 @@ def test_changing_who_is_in_it_does_invalidate(_own_project):
     """The model is told who can speak, so a new person is a question it
     would answer differently."""
     before = analyze.prompt_sha()
-    settings = _own_project / "greels.yaml"
+    settings = _own_project / "splice.yaml"
     settings.write_text(settings.read_text() + "  - id: uncle\n")
     import os
     os.utime(settings, ns=(1, 2_000_000_000_000_000_000))
@@ -135,9 +135,9 @@ def test_the_default_prompt_is_about_this_footage_and_these_people():
 
 
 def test_a_project_about_nobody_attributes_every_line_to_nobody(monkeypatch, tmp_path):
-    path = tmp_path / "greels.yaml"
+    path = tmp_path / "splice.yaml"
     path.write_text("language: Spanish\n")
-    monkeypatch.setenv("GREELS_CONFIG", str(path))
+    monkeypatch.setenv("SPLICE_CONFIG", str(path))
 
     assert schema.speakers() == ()
     assert analyze._speaker("grandma") == ""
@@ -176,20 +176,20 @@ def test_a_project_with_no_archive_backs_up_nowhere_and_says_so():
 
 
 def test_an_archive_is_relative_to_the_media_root(_own_project, monkeypatch, tmp_path):
-    settings = _own_project / "greels.yaml"
+    settings = _own_project / "splice.yaml"
     settings.write_text(settings.read_text() + "archive: kept\n")
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     assert config.archive_dir() == tmp_path / "kept"
 
 
 def test_an_archive_belongs_to_the_media_root_that_made_it(monkeypatch, tmp_path):
-    """Mirroring deletes what the source lacks. A copied greels.yaml pointing
+    """Mirroring deletes what the source lacks. A copied splice.yaml pointing
     a second project at the first one's archive would prune its transcripts."""
     archive = tmp_path / "archive"
     archive.mkdir()
     (archive / "manifest.json").write_text(json.dumps({"media_root": "/somebody/else"}))
-    monkeypatch.setenv("GREELS_ARCHIVE", str(archive))
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path / "media"))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(archive))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path / "media"))
     config.index_dir().mkdir(parents=True)
 
     with pytest.raises(backup.Refused, match="is the archive of /somebody/else"):
@@ -200,11 +200,11 @@ def test_an_archive_belongs_to_the_media_root_that_made_it(monkeypatch, tmp_path
 
 
 def test_the_project_itself_is_backed_up_beside_the_transcripts(_own_project, monkeypatch, tmp_path):
-    """greels.yaml and the vocabulary are hand-made and sit in the media root,
+    """splice.yaml and the vocabulary are hand-made and sit in the media root,
     where nothing else versions them."""
     archive = tmp_path / "archive"
-    monkeypatch.setenv("GREELS_ARCHIVE", str(archive))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(archive))
     backup.backup()
-    assert (archive / "project" / "greels.yaml").read_text() == (
-        _own_project / "greels.yaml").read_text()
+    assert (archive / "project" / "splice.yaml").read_text() == (
+        _own_project / "splice.yaml").read_text()
     assert (archive / "project" / "taxonomy.yaml").exists()

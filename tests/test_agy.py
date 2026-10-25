@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from greels import agy, analyze
+from splice import agy, analyze
 
 
 def _agy(monkeypatch, stdout="", stderr="", code=0):

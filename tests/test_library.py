@@ -2,12 +2,12 @@
 
 import pytest
 
-from greels import config, legacy, library
+from splice import config, legacy, library
 
 
 @pytest.fixture
 def raw(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     root = tmp_path / "raw"
     (root / "from_phone").mkdir(parents=True)
     for name in [
@@ -54,7 +54,7 @@ def test_match_accepts_globs_and_bare_substrings(pattern, expected):
 
 
 def test_chunks_are_returned_in_time_order(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     config.chunk_dir().mkdir(parents=True)
     for offset in ("00960", "00000", "00240"):
         (config.chunk_dir() / f"clip__{offset}.mp4").touch()

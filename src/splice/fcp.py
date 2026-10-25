@@ -86,7 +86,7 @@ def _connect(event_db: Path) -> sqlite3.Connection:
 
     # Mid-write, or a WAL we cannot see. A copy is consistent enough to read a
     # list of names from, and is never worse than giving up.
-    staged = Path(tempfile.mkdtemp(prefix="greels-fcp-")) / event_db.name
+    staged = Path(tempfile.mkdtemp(prefix="splice-fcp-")) / event_db.name
     shutil.copyfile(event_db, staged)
     return sqlite3.connect(f"file:{staged}?mode=ro", uri=True)
 

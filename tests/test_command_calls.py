@@ -1,6 +1,6 @@
 """Calling a command function directly, which is what everything here does.
 
-`greels reel new` is a plain function with typer Options as defaults, so a
+`splice reel new` is a plain function with typer Options as defaults, so a
 test -- or `sync` -- can call it. The trap is that an option you do not pass
 does not arrive as its default: it arrives as a `typer.models.OptionInfo`,
 which is an object, and every object is truthy. Adding an option to a command
@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 import typer
 
-from greels import cli, cli_reel
+from splice import cli, cli_reel
 
 MODULES = {"cli": cli, "cli_reel": cli_reel}
 ROOT = Path(__file__).resolve().parents[1]
@@ -69,7 +69,7 @@ def _command_calls(path: Path):
 
 
 SOURCES = sorted(
-    list((ROOT / "src" / "greels").glob("*.py")) + list((ROOT / "tests").glob("*.py"))
+    list((ROOT / "src" / "splice").glob("*.py")) + list((ROOT / "tests").glob("*.py"))
 )
 
 

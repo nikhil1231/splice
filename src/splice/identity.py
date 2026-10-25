@@ -44,7 +44,7 @@ class Finding:
     @property
     def note(self) -> str:
         if self.verdict is Verdict.ADOPTED:
-            return f"{self.known_as} -> {self.stem} (renamed outside greels)"
+            return f"{self.known_as} -> {self.stem} (renamed outside splice)"
         if self.verdict is Verdict.DUPLICATE:
             return f"{self.stem} is the same footage as {self.known_as}"
         if self.verdict is Verdict.REPLACED:
@@ -154,7 +154,7 @@ def survey(paths: list[Path], sidecars: list[Sidecar]) -> Survey:
 
 
 def adopt(finding: Finding) -> None:
-    """Follow a rename that happened outside greels.
+    """Follow a rename that happened outside splice.
 
     The analysis is the expensive part and none of it depends on the filename,
     so this moves the sidecar, proxy, chunks and segment ids across and keeps

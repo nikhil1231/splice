@@ -12,7 +12,7 @@ Two verified facts shape this module:
   picked up, so this passes --dangerously-skip-permissions rather than editing
   the user's global agy config behind their back. The prompt tells the model to
   read only, and the flag scopes to this one subprocess. Set
-  GREELS_AGY_SKIP_PERMISSIONS=0 if you have allow-rules configured elsewhere.
+  SPLICE_AGY_SKIP_PERMISSIONS=0 if you have allow-rules configured elsewhere.
 
   The denial is worth guarding for explicitly: agy reports it as
   `status: SUCCESS` with an empty response and a `denied_actions` list, which
@@ -438,7 +438,7 @@ def analyze_asset(
 
 
 def schema_file() -> Path:
-    path = Path(tempfile.gettempdir()) / "greels_agy_schema.json"
+    path = Path(tempfile.gettempdir()) / "splice_agy_schema.json"
     return write_agy_schema(path)
 
 

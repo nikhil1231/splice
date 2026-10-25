@@ -1,4 +1,4 @@
-"""`greels doctor`.
+"""`splice doctor`.
 
 The question it answers is not "where has the footage got to" but "does the
 machine around it still work" — after a laptop change, an OS upgrade, or a
@@ -8,14 +8,14 @@ drive that did not mount. So the tests are about what it notices missing.
 import pytest
 import typer
 
-from greels import cli, config, index, library
-from greels.schema import Asset, Line, Segment, Sidecar
+from splice import cli, config, index, library
+from splice.schema import Asset, Line, Segment, Sidecar
 
 
 @pytest.fixture
 def healthy(tmp_path, monkeypatch, capsys):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.delenv("GREELS_FCP_LIBRARY", raising=False)
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.delenv("SPLICE_FCP_LIBRARY", raising=False)
     config.raw_dir().mkdir(parents=True)
     config.proxy_dir().mkdir(parents=True)
     (config.raw_dir() / "a.MOV").write_bytes(b"x")
@@ -65,18 +65,18 @@ def test_an_index_behind_the_sidecars_is_noticed(healthy, capsys):
     sidecar.save(config.sidecar_path("a"))
 
     _run()
-    assert "run `greels index`" in capsys.readouterr().out
+    assert "run `splice index`" in capsys.readouterr().out
 
 
 def test_an_unmounted_media_root_is_a_failure_not_a_note(healthy, monkeypatch, tmp_path, capsys):
     """This is the one that means "stop and check the drive"."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path / "unmounted"))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path / "unmounted"))
     assert _run() == 1
     assert "unmounted volume" in capsys.readouterr().out
 
 
 def test_a_cut_with_a_shot_that_came_loose_is_a_failure(healthy, capsys):
-    from greels import reel as store
+    from splice import reel as store
 
     store.create("A cut", shots=[store.Shot(stem="gone", start=0, end=5)])
     assert _run() == 1
@@ -96,7 +96,7 @@ def test_a_missing_tool_is_reported_against_what_it_is_for(healthy, monkeypatch,
 def test_status_says_how_far_the_review_pass_has_got(healthy, capsys):
     """Everything downstream waits on it: favourites-first suggestions, `reel
     unused`, and not being offered again a moment you turned down."""
-    from greels import library
+    from splice import library
 
     cli.status(editor=None)
     assert "judged   : 0 of 1" in capsys.readouterr().out
@@ -128,8 +128,8 @@ def test_the_browser_is_offered_the_same_checks_the_terminal_prints(healthy):
     """`doctor` printed all of this into a terminal, which on an evening spent
     in the browser is nowhere. Both read one list, so the header cannot end up
     reassuring you about an archive the terminal is complaining about."""
-    from greels import health
-    from greels.server import Api, Autosave
+    from splice import health
+    from splice.server import Api, Autosave
 
     payload = Api(autosave=Autosave(after=0)).health()
 
@@ -144,7 +144,7 @@ def test_a_check_names_the_command_that_would_deal_with_it(healthy, monkeypatch)
     """"12 line timings sit off the speech" does not tell anybody it means
     `align`. The browser puts the fix under the complaint, so the name has to
     come from here rather than from a lookup table in the page."""
-    from greels import health, speech
+    from splice import health, speech
 
     monkeypatch.setattr(speech, "_load_cache", lambda: {"a": {"runs": [[5.0, 9.0]]}})
     monkeypatch.setattr(

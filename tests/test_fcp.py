@@ -10,7 +10,7 @@ import sqlite3
 
 import pytest
 
-from greels import fcp
+from splice import fcp
 
 # The two CoreData tables the reader touches, as Final Cut lays them out.
 EVENT_SCHEMA = """
@@ -73,8 +73,8 @@ def make_event(bundle, event_name, clips, assets=None):
 
 @pytest.fixture
 def library(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.delenv("GREELS_FCP_LIBRARY", raising=False)
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.delenv("SPLICE_FCP_LIBRARY", raising=False)
     bundle = tmp_path / "Grandparents.fcpbundle"
     bundle.mkdir(parents=True)
     return bundle
@@ -110,8 +110,8 @@ def test_asset_hashes_are_read(library):
 
 def test_no_library_is_not_an_empty_library(tmp_path, monkeypatch):
     """The difference decides whether every clip gets offered again."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.delenv("GREELS_FCP_LIBRARY", raising=False)
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.delenv("SPLICE_FCP_LIBRARY", raising=False)
     assert fcp.imported_clips() is None
 
 
@@ -141,11 +141,11 @@ def test_one_corrupt_row_does_not_lose_the_others(library):
 
 
 def test_an_explicit_library_path_wins(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path / "media"))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path / "media"))
     elsewhere = tmp_path / "Somewhere.fcpbundle"
     elsewhere.mkdir(parents=True)
     make_event(elsewhere, "Grandparents", ["lunch"])
-    monkeypatch.setenv("GREELS_FCP_LIBRARY", str(elsewhere))
+    monkeypatch.setenv("SPLICE_FCP_LIBRARY", str(elsewhere))
     assert fcp.imported_clips() == {"lunch": 1}
 
 

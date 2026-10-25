@@ -10,15 +10,15 @@ from fractions import Fraction
 
 import pytest
 
-from greels import export_reel, reel as store
-from greels.fcptime import timebase
-from greels.reel import Reel, Shot
-from greels.schema import Asset, Line, Segment, Sidecar
+from splice import export_reel, reel as store
+from splice.fcptime import timebase
+from splice.reel import Reel, Shot
+from splice.schema import Asset, Line, Segment, Sidecar
 
 
 @pytest.fixture(autouse=True)
 def root(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     (tmp_path / "index").mkdir()
     return tmp_path
 
@@ -327,7 +327,7 @@ def test_captions_can_be_left_out(footage):
 
 
 @pytest.mark.skipif(
-    __import__("greels.export_fcpxml", fromlist=["dtd_path"]).dtd_path() is None,
+    __import__("splice.export_fcpxml", fromlist=["dtd_path"]).dtd_path() is None,
     reason="Final Cut is not installed, so Apple's DTD is not here to check against",
 )
 def test_a_written_reel_passes_apples_own_dtd(footage, tmp_path):

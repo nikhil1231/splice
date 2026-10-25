@@ -7,8 +7,8 @@ on a table.
 
 import pytest
 
-from greels import config, index, similarity
-from greels.schema import Asset, Segment, Sidecar
+from splice import config, index, similarity
+from splice.schema import Asset, Segment, Sidecar
 
 
 def seg(sid, start, title, tags, summary="", end=None):
@@ -18,7 +18,7 @@ def seg(sid, start, title, tags, summary="", end=None):
 
 @pytest.fixture
 def space(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
 
     def clip(stem, segments):
         Sidecar(
@@ -164,7 +164,7 @@ def test_every_used_tag_has_a_signal(space):
 @pytest.fixture
 def opinionated(tmp_path, monkeypatch):
     """A little archive where some verdicts have been given."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
 
     def clip(stem, segments, created):
         Sidecar(
@@ -224,7 +224,7 @@ def test_a_suggestion_runs_in_the_order_the_footage_was_taken(opinionated):
 
 def test_a_moment_you_rejected_is_not_proposed_again(opinionated):
     """A suggestion that keeps offering it asks you to decide twice."""
-    from greels import library
+    from splice import library
 
     sidecar = library.load_sidecar("middle")
     sidecar.segments[0].rating = "rejected"
@@ -235,7 +235,7 @@ def test_a_moment_you_rejected_is_not_proposed_again(opinionated):
 
 
 def test_a_favourite_is_taken_before_anything_else(opinionated):
-    from greels import library
+    from splice import library
 
     sidecar = library.load_sidecar("late")
     sidecar.segments[0].rating = "favorite"
@@ -262,7 +262,7 @@ def paired(tmp_path, monkeypatch):
     gathers the wedding photos and a story with no photos in it. Only together
     do they name "the wedding photographs".
     """
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
 
     def clip(stem, segments):
         Sidecar(
@@ -327,7 +327,7 @@ def spoken(tmp_path, monkeypatch):
     """The crow, reduced. Two moments are plainly about feeding a crow, and the
     taxonomy has no word for a crow: on tags they share only the people who are
     in everything, and the three other things shot on the balcony beat them."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     both = ["person:nikhil", "person:grandma"]
 
     def clip(stem, segments):

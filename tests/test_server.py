@@ -11,14 +11,14 @@ from pathlib import Path
 
 import pytest
 
-from greels import config, index
-from greels.schema import Asset, Line, Segment, Sidecar
-from greels.server import Api
+from splice import config, index
+from splice.schema import Asset, Line, Segment, Sidecar
+from splice.server import Api
 
 
 @pytest.fixture
 def api(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     config.raw_dir().mkdir(parents=True, exist_ok=True)
     (config.raw_dir() / "a.MOV").write_bytes(b"movie")
     Sidecar(
@@ -77,7 +77,7 @@ def test_texts_returns_every_segment_and_its_read_only_prose(api):
 def test_editing_writes_through_to_the_sidecar(api):
     api.update_segment("a#00000.00", {"title": "Renamed", "rating": "favorite"})
 
-    from greels import library
+    from splice import library
 
     saved = library.load_sidecar("a").segments[0]
     assert saved.title == "Renamed"
@@ -96,7 +96,7 @@ def test_an_invalid_rating_is_refused_and_changes_nothing(api):
     with pytest.raises(Exception):
         api.update_segment("a#00000.00", {"rating": "amazing"})
 
-    from greels import library
+    from splice import library
 
     assert library.load_sidecar("a").segments[0].rating == "none"
 
@@ -111,7 +111,7 @@ def test_fields_that_are_not_editable_are_ignored(api):
 def test_deleting_a_segment_leaves_the_rest(api):
     assert api.delete_segment("a#00030.00")["remaining"] == 1
 
-    from greels import library
+    from splice import library
 
     assert [s.id for s in library.load_sidecar("a").segments] == ["a#00000.00"]
 
@@ -158,8 +158,8 @@ def test_a_deleted_segment_is_put_back_where_it_was_and_only_once(api):
 
     api.restore_segment({"segment": gone})
 
-    from greels import library
-    from greels.drafts import Conflict
+    from splice import library
+    from splice.drafts import Conflict
 
     assert [(s.id, s.title) for s in library.load_sidecar("a").segments] == [
         ("a#00000.00", "Corrected after the delete"), ("a#00030.00", "Also corrected")]
@@ -261,8 +261,8 @@ def test_a_cut_is_indexed_so_it_survives_a_rebuild(api):
 def http(api, tmp_path):
     import threading
 
-    from greels import config
-    from greels.server import serve
+    from splice import config
+    from splice.server import serve
 
     proxy = config.proxy_dir() / "a.mp4"
     proxy.parent.mkdir(parents=True, exist_ok=True)
@@ -310,7 +310,7 @@ def test_the_page_and_its_json_are_never_cached(http):
 def test_the_optional_plan_schedule_is_served_without_changing_it(http, tmp_path, monkeypatch):
     import json
 
-    monkeypatch.setenv("GREELS_CONFIG", str(tmp_path / "greels.yaml"))
+    monkeypatch.setenv("SPLICE_CONFIG", str(tmp_path / "splice.yaml"))
     status, _, body = _get(http + "/api/plans/seed")
     assert status == 200
     assert json.loads(body) is None
@@ -370,8 +370,8 @@ def test_a_clip_says_how_much_of_it_is_in_a_cut(api):
 
 
 def test_a_clip_with_no_segments_has_no_poster(api, tmp_path):
-    from greels import config
-    from greels.schema import Asset, Sidecar
+    from splice import config
+    from splice.schema import Asset, Sidecar
 
     Sidecar(asset=Asset(file="b.MOV", stem="b", duration=10, fps="30")).save(
         config.sidecar_path("b")
@@ -397,7 +397,7 @@ def _wait(predicate, seconds=5.0):
 @pytest.fixture
 def rendering(api, monkeypatch, tmp_path):
     """A render that writes a file without an encoder anywhere near it."""
-    from greels import render
+    from splice import render
 
     def fake_run(args, on_progress=None):
         if on_progress:
@@ -409,7 +409,7 @@ def rendering(api, monkeypatch, tmp_path):
 
 
 def test_rendering_a_cut_writes_a_file_and_records_it(rendering):
-    from greels import reel as store
+    from splice import reel as store
 
     cut = rendering.create_cut({"title": "Marriage", "segments": ["a#00000.00"]})
     started = rendering.render_cut(cut["slug"])
@@ -428,7 +428,7 @@ def test_an_empty_cut_will_not_render(rendering):
 
 
 def test_a_failed_render_is_reported_rather_than_lost_on_a_thread(api, monkeypatch):
-    from greels import render
+    from splice import render
 
     def explode(args, on_progress=None):
         raise render.RenderError("ffmpeg failed: no such file")
@@ -444,7 +444,7 @@ def test_only_one_render_runs_at_a_time(api, monkeypatch):
     """Two encodes at once is not twice the work, it is both at half speed."""
     import threading
 
-    from greels import render
+    from splice import render
 
     release = threading.Event()
     monkeypatch.setattr(render, "_run",
@@ -463,7 +463,7 @@ def test_only_one_render_runs_at_a_time(api, monkeypatch):
 def test_asking_again_for_the_one_running_is_not_an_error(api, monkeypatch):
     import threading
 
-    from greels import render
+    from splice import render
 
     release = threading.Event()
     monkeypatch.setattr(render, "_run",
@@ -504,7 +504,7 @@ def test_captions_come_back_as_webvtt_rebased_onto_the_cut(api):
 
 
 def test_a_rendered_cut_is_served_with_ranges_and_nothing_else_is(http, api, tmp_path):
-    from greels import render
+    from splice import render
 
     out = render.out_dir()
     out.mkdir(parents=True, exist_ok=True)
@@ -516,10 +516,10 @@ def test_a_rendered_cut_is_served_with_ranges_and_nothing_else_is(http, api, tmp
 
 
 def test_snapping_a_cut_moves_it_onto_speech_and_keeps_the_old_one(api, monkeypatch):
-    from greels import trash
+    from splice import trash
 
     monkeypatch.setattr(
-        "greels.speech.runs_for", lambda stem, cache=None: [[0.5, 29.5]]
+        "splice.speech.runs_for", lambda stem, cache=None: [[0.5, 29.5]]
     )
     cut = api.create_cut({"title": "Marriage", "segments": ["a#00000.00"]})
     result = api.snap_cut(cut["slug"])
@@ -530,14 +530,14 @@ def test_snapping_a_cut_moves_it_onto_speech_and_keeps_the_old_one(api, monkeypa
 
 
 def test_snapping_a_cut_that_is_already_on_speech_changes_nothing(api, monkeypatch):
-    monkeypatch.setattr("greels.speech.runs_for", lambda stem, cache=None: [])
+    monkeypatch.setattr("splice.speech.runs_for", lambda stem, cache=None: [])
     cut = api.create_cut({"title": "Marriage", "segments": ["a#00000.00"]})
     assert api.snap_cut(cut["slug"])["moved"] == 0
 
 
 def test_a_line_can_go_into_a_cut_trimmed_to_itself(api, monkeypatch):
     """A quote, not the two minutes it sits inside."""
-    monkeypatch.setattr("greels.speech.runs_for", lambda stem, cache=None: [])
+    monkeypatch.setattr("splice.speech.runs_for", lambda stem, cache=None: [])
     cut = api.create_cut({"title": "Money"})
     result = api.add_line_to_cut(cut["slug"], {
         "stem": "a", "segment_id": "a#00000.00",
@@ -552,7 +552,7 @@ def test_a_line_can_go_into_a_cut_trimmed_to_itself(api, monkeypatch):
 
 def test_a_line_is_snapped_to_where_it_actually_starts(api, monkeypatch):
     monkeypatch.setattr(
-        "greels.speech.runs_for", lambda stem, cache=None: [[9.9, 12.8]]
+        "splice.speech.runs_for", lambda stem, cache=None: [[9.9, 12.8]]
     )
     cut = api.create_cut({"title": "Money"})
     shot, = api.add_line_to_cut(cut["slug"], {
@@ -573,11 +573,11 @@ def test_lines_need_something_to_search_for(api):
 def test_a_write_starts_the_clock_on_a_backup(api, monkeypatch):
     """`backup` was a button you had to remember, and a corrected transcript
     is the least regenerable thing in the archive."""
-    from greels.server import Autosave
+    from splice.server import Autosave
 
     api.autosave = Autosave(after=0.01, on_message=lambda m: None)
     ran = []
-    monkeypatch.setattr("greels.backup.backup", lambda: ran.append(True) or (1, 0, 0))
+    monkeypatch.setattr("splice.backup.backup", lambda: ran.append(True) or (1, 0, 0))
 
     api.update_segment("a#00000.00", {"summary": "corrected"})
     assert _wait(lambda: ran, 2.0)
@@ -586,10 +586,10 @@ def test_a_write_starts_the_clock_on_a_backup(api, monkeypatch):
 def test_a_burst_of_edits_is_one_backup(monkeypatch):
     """A review pass writes a rating every two seconds; copying sixty files
     each time would be silly."""
-    from greels.server import Autosave
+    from splice.server import Autosave
 
     ran = []
-    monkeypatch.setattr("greels.backup.backup", lambda: ran.append(True) or (1, 0, 0))
+    monkeypatch.setattr("splice.backup.backup", lambda: ran.append(True) or (1, 0, 0))
     saver = Autosave(after=0.15, on_message=lambda m: None)
     for _ in range(5):
         saver.touch()
@@ -598,10 +598,10 @@ def test_a_burst_of_edits_is_one_backup(monkeypatch):
 
 
 def test_nothing_to_save_is_not_a_backup(monkeypatch):
-    from greels.server import Autosave
+    from splice.server import Autosave
 
     ran = []
-    monkeypatch.setattr("greels.backup.backup", lambda: ran.append(True) or (0, 0, 0))
+    monkeypatch.setattr("splice.backup.backup", lambda: ran.append(True) or (0, 0, 0))
     Autosave(after=10, on_message=lambda m: None).stop()
     assert ran == []
 
@@ -609,13 +609,13 @@ def test_nothing_to_save_is_not_a_backup(monkeypatch):
 def test_a_refused_backup_is_said_out_loud_and_not_raised(monkeypatch):
     """A safety net that brings the server down when the media root is
     unmounted is worse than none."""
-    from greels import backup as store
-    from greels.server import Autosave
+    from splice import backup as store
+    from splice.server import Autosave
 
     def refuse():
         raise store.Refused("index/ does not exist")
 
-    monkeypatch.setattr("greels.backup.backup", refuse)
+    monkeypatch.setattr("splice.backup.backup", refuse)
     said = []
     saver = Autosave(after=0.01, on_message=said.append)
     saver.touch()
@@ -624,10 +624,10 @@ def test_a_refused_backup_is_said_out_loud_and_not_raised(monkeypatch):
 
 
 def test_autosave_can_be_turned_off(monkeypatch):
-    from greels.server import Autosave
+    from splice.server import Autosave
 
     ran = []
-    monkeypatch.setattr("greels.backup.backup", lambda: ran.append(True) or (1, 0, 0))
+    monkeypatch.setattr("splice.backup.backup", lambda: ran.append(True) or (1, 0, 0))
     saver = Autosave(after=0, on_message=lambda m: None)
     saver.touch()
     saver.stop()
@@ -725,7 +725,7 @@ def test_prose_that_had_already_diverged_is_left_alone(api):
 
 
 def test_correcting_a_line_keeps_a_copy_of_the_sidecar(api):
-    from greels import trash
+    from splice import trash
 
     api.update_segment("a#00000.00", {"lines": [
         {"start": 0, "end": 2, "kok": "", "en": "Married?"},
@@ -759,7 +759,7 @@ def test_a_line_search_returns_what_was_asked_for(api):
 # --- the routes the page actually calls ------------------------------------
 
 
-PAGE = Path(__file__).resolve().parents[1] / "src" / "greels" / "web" / "index.html"
+PAGE = Path(__file__).resolve().parents[1] / "src" / "splice" / "web" / "index.html"
 
 
 def _page_routes() -> set[str]:
@@ -917,7 +917,7 @@ def test_correcting_a_caption_does_not_un_attribute_it(api):
     line from exactly those two fields -- so fixing a typo silently dropped the
     speaker, and with it the colour that tells two people apart. The same bug
     the analysis merge had, in the other direction."""
-    from greels import library
+    from splice import library
 
     api.update_segment("a#00000.00", {"lines": [
         {"start": 0, "end": 2, "kok": "Lagn zalato?", "en": "Is he married?",
@@ -944,7 +944,7 @@ def test_a_corrected_caption_reaches_the_prose_that_search_reads(api):
     76 space-joined. Comparing only against newlines meant a corrected caption
     reached the prose in 12% of segments, and the docstring claiming otherwise
     was the only place it reliably happened."""
-    from greels import library
+    from splice import library
 
     api.update_segment("a#00000.00", {"english": "Is he married?"})  # space-join of one
     api.update_segment("a#00000.00", {"lines": [
@@ -957,7 +957,7 @@ def test_a_corrected_caption_reaches_the_prose_that_search_reads(api):
 def test_prose_edited_by_hand_in_the_same_save_wins(api):
     """Typing in the prose box and correcting a line at once is a person
     saying which one they meant."""
-    from greels import library
+    from splice import library
 
     api.update_segment("a#00000.00", {
         "english": "Something else entirely",
@@ -981,7 +981,7 @@ def _job(api):
 def _command_that_waits(api, name, attr, check=False):
     """A command held open at its slowest point, which is where the questions
     are: what a save does now, and what a second click does."""
-    from greels import cli
+    from splice import cli
 
     started, release, calls = threading.Event(), threading.Event(), []
 
@@ -1007,7 +1007,7 @@ def test_the_sync_button_checks_before_it_spends_an_hour(api, monkeypatch):
     set of renames; the check costs seconds and changes nothing, so what it
     will cost is on screen before it is spent."""
     calls = []
-    monkeypatch.setattr("greels.cli.sync", lambda **kw: calls.append(kw))
+    monkeypatch.setattr("splice.cli.sync", lambda **kw: calls.append(kw))
 
     api.run_command({"name": "sync", "check": True})
 
@@ -1028,7 +1028,7 @@ def test_an_edit_during_a_sync_is_refused_rather_than_written_over(api):
     the ones it changed, so an edit that lands mid-walk is written over. A
     hand-corrected transcript is the one thing here nothing can produce again;
     a sentence saying to wait is a better outcome than a lost evening."""
-    from greels import drafts, library
+    from splice import drafts, library
 
     with _command_that_waits(api, "sync", "sync"):
         with pytest.raises(drafts.Conflict, match="Sync raw/ is running"):
@@ -1042,7 +1042,7 @@ def test_an_edit_during_a_sync_is_refused_rather_than_written_over(api):
 def test_a_sync_that_fails_still_hands_the_archive_back(api, monkeypatch):
     """Otherwise the only way to edit anything again is to restart the server,
     and the reason would be a stack trace nobody saw."""
-    monkeypatch.setattr("greels.cli.sync", lambda **kw: 1 / 0)
+    monkeypatch.setattr("splice.cli.sync", lambda **kw: 1 / 0)
 
     api.run_command({"name": "sync", "check": False})
 
@@ -1054,7 +1054,7 @@ def test_a_sync_that_fails_still_hands_the_archive_back(api, monkeypatch):
 def test_what_a_sync_prints_reaches_the_browser(api, monkeypatch, capsys):
     """`sync` says what it is doing through stdout, and a browser shown none
     of it looks like a hang. It is a tee rather than a capture because whoever
-    started `greels serve` is watching that terminal too."""
+    started `splice serve` is watching that terminal too."""
     import typer
 
     def talk(**kw):
@@ -1062,7 +1062,7 @@ def test_what_a_sync_prints_reaches_the_browser(api, monkeypatch, capsys):
         typer.echo("nothing new to import")
         print("cut off mid-", end="")   # no newline: a crash, or a prompt
 
-    monkeypatch.setattr("greels.cli.sync", talk)
+    monkeypatch.setattr("splice.cli.sync", talk)
 
     api.run_command({"name": "sync", "check": True})
 
@@ -1088,12 +1088,12 @@ def test_opening_the_page_again_joins_the_sync_already_running(api):
 def test_a_finished_sync_starts_the_clock_on_a_backup(api, monkeypatch):
     """It has just written sidecars nothing has mirrored, which is exactly
     when the archive is most worth having in git."""
-    from greels.server import Autosave
+    from splice.server import Autosave
 
     api.autosave = Autosave(after=0.01, on_message=lambda m: None)
     ran = []
-    monkeypatch.setattr("greels.backup.backup", lambda: ran.append(True) or (1, 0, 0))
-    monkeypatch.setattr("greels.cli.sync", lambda **kw: None)
+    monkeypatch.setattr("splice.backup.backup", lambda: ran.append(True) or (1, 0, 0))
+    monkeypatch.setattr("splice.cli.sync", lambda **kw: None)
 
     api.run_command({"name": "sync", "check": False})
 
@@ -1102,12 +1102,12 @@ def test_a_finished_sync_starts_the_clock_on_a_backup(api, monkeypatch):
 
 def test_a_dry_run_is_not_a_reason_to_back_anything_up(api, monkeypatch):
     """Nothing changed, so there is nothing to mirror."""
-    from greels.server import Autosave
+    from splice.server import Autosave
 
     api.autosave = Autosave(after=0.01, on_message=lambda m: None)
     ran = []
-    monkeypatch.setattr("greels.backup.backup", lambda: ran.append(True) or (1, 0, 0))
-    monkeypatch.setattr("greels.cli.sync", lambda **kw: None)
+    monkeypatch.setattr("splice.backup.backup", lambda: ran.append(True) or (1, 0, 0))
+    monkeypatch.setattr("splice.cli.sync", lambda **kw: None)
 
     api.run_command({"name": "sync", "check": True})
 
@@ -1124,7 +1124,7 @@ def test_a_sync_that_quits_reports_why_and_not_its_exit_code(api, monkeypatch):
         typer.echo("! proxy build failed: ffmpeg -y failed: moov atom not found")
         raise typer.Exit(1)
 
-    monkeypatch.setattr("greels.cli.sync", give_up)
+    monkeypatch.setattr("splice.cli.sync", give_up)
 
     api.run_command({"name": "sync", "check": False})
 
@@ -1134,7 +1134,7 @@ def test_a_sync_that_quits_reports_why_and_not_its_exit_code(api, monkeypatch):
     )
 
 
-# Which `greels` command each menu entry is. Written out rather than derived,
+# Which `splice` command each menu entry is. Written out rather than derived,
 # so that adding one to the registry without saying what it runs fails here.
 MENU_REACHES = {
     "sync": "sync",
@@ -1152,7 +1152,7 @@ MENU_REACHES = {
 
 
 def test_the_menu_offers_exactly_the_commands_this_file_knows_about():
-    from greels import server
+    from splice import server
 
     assert set(server.commands()) == set(MENU_REACHES)
 
@@ -1162,7 +1162,7 @@ def test_every_command_in_the_menu_reaches_the_one_it_names(api, monkeypatch, na
     """Each entry in the registry is a lambda, and a typo in one is a 500 the
     first time somebody picks it -- months after it was written, and only ever
     in the item nobody uses."""
-    from greels import cli
+    from splice import cli
 
     called = []
     monkeypatch.setattr(cli, MENU_REACHES[name], lambda *a, **kw: called.append(kw))
@@ -1262,7 +1262,7 @@ def test_every_tab_has_an_address_that_serves_the_page(http):
     path the server does not know would be a 404 instead of the page. With
     or without the trailing slash, since that is how people type them.
     """
-    from greels.server import PAGES
+    from splice.server import PAGES
 
     _, _, page = _get(http + "/")
     for path in sorted(PAGES):
@@ -1308,7 +1308,7 @@ def test_exporting_a_cut_says_which_menu_to_use_afterwards(api):
 
     The page used to carry one sentence, and it was Final Cut's.
     """
-    from greels import reel as store
+    from splice import reel as store
 
     store.Reel(slug="r", title="R",
                shots=[store.Shot(stem="a", start=1.0, end=9.0)]).save()
@@ -1330,8 +1330,8 @@ def test_the_clips_table_asks_about_one_editor_at_a_time(api):
     Reading Final Cut's record while the page says Resolve would tell you the
     footage was in a media pool nothing has ever sent it to.
     """
-    from greels import config, library
-    from greels.schema import ExportRecord
+    from splice import config, library
+    from splice.schema import ExportRecord
 
     sidecar = library.load_sidecar("a")
     sidecar.set_delivery("fcp", ExportRecord(
@@ -1349,7 +1349,7 @@ def test_a_cut_read_back_is_read_the_same_way_whichever_wrote_it(api):
     Asking which program wrote it would be a question with no good answer --
     the dialects overlap -- and a wrong guess would refuse a readable file.
     """
-    from greels import reel as store
+    from splice import reel as store
 
     store.Reel(slug="r", title="R",
                shots=[store.Shot(stem="a", start=1.0, end=9.0)]).save()

@@ -7,7 +7,7 @@ back -- so it binds to 127.0.0.1 only, and never to anything else.
 
 Three things here are not request/response. A **render** takes tens of
 seconds, so it runs on a thread and reports how far in it has got; one at a
-time, because encoding takes the whole machine. The header's **commands** are `greels`
+time, because encoding takes the whole machine. The header's **commands** are `splice`
 itself -- sync, align, rename -- and take as long as they take, so they run
 on a thread too, one at a time, and own the archive against edits while they
 do. And every write starts a clock on a **backup** into the repo,
@@ -250,7 +250,7 @@ class Echo:
     These commands say what they are doing through `typer.echo`, which is
     stdout, so standing in front of stdout is the only way to put it in a
     browser. It is a tee rather than a capture because whoever started
-    `greels serve` is watching that terminal, and a run that went silent
+    `splice serve` is watching that terminal, and a run that went silent
     there would look like a hang. Nothing else writes to stdout during one
     except the autosave notice, and that line is worth seeing in both places.
     """
@@ -1401,7 +1401,7 @@ class Api:
             sidecar.save(config.sidecar_path(stem))
             self._wrote()
             # The whole segment, so the page can undo the delete without the
-            # trash: `greels trash restore` puts back the whole sidecar, and
+            # trash: `splice trash restore` puts back the whole sidecar, and
             # with it undoes every correction made to the clip since.
             return {"deleted": segment_id, "remaining": len(sidecar.segments),
                     "segment": gone.model_dump(mode="json")}
@@ -1441,7 +1441,7 @@ class Api:
             after=self.autosave.touch, editor=body.get("editor"))
 
     def health(self, editor=None) -> dict:
-        """The same checks `greels doctor` prints, for the header to draw.
+        """The same checks `splice doctor` prints, for the header to draw.
 
         The evenings happen in the browser, so a drive that did not mount, an
         index behind the sidecars or transcripts that are in one place only
@@ -1470,7 +1470,7 @@ class Api:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "greels"
+    server_version = "splice"
     protocol_version = "HTTP/1.1"
 
     def __init__(self, *args, api: Api, **kwargs):

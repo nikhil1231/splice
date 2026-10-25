@@ -319,7 +319,7 @@ def _append_clip(
     # Order matters to the DTD: <note> before the marker-item group.
     if sc.analysis.errors:
         note = ET.SubElement(clip, "note")
-        note.text = "greels: " + "; ".join(sc.analysis.errors)[:500]
+        note.text = "splice: " + "; ".join(sc.analysis.errors)[:500]
 
     clip_end = snap(sc.asset.duration, fps)
     for seg in sc.segments:
@@ -589,7 +589,7 @@ def mark_offered(
 def mark_exported(
     sidecars: list[Sidecar], editor: Editor | str | None = None
 ) -> None:
-    """Assert delivery by hand, for a library greels cannot read."""
+    """Assert delivery by hand, for a library splice cannot read."""
     which = editors.get(editor)
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
     for sidecar in sidecars:

@@ -6,14 +6,14 @@ between two backups is where a mistyped edit or a mis-clicked Delete lives.
 
 import pytest
 
-from greels import config, index, trash
-from greels.schema import Asset, Segment, Sidecar
-from greels.server import Api
+from splice import config, index, trash
+from splice.schema import Asset, Segment, Sidecar
+from splice.server import Api
 
 
 @pytest.fixture
 def api(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     Sidecar(
         asset=Asset(file="a.MOV", stem="a", duration=120, fps="30"),
         segments=[
@@ -89,9 +89,9 @@ def test_deleting_a_cut_keeps_it(api):
 
 def test_the_trash_does_not_look_like_a_sidecar_to_anything_else(api, monkeypatch, tmp_path):
     """It lives in a subdirectory, so the globs that find sidecars miss it."""
-    from greels import backup as store, library
+    from splice import backup as store, library
 
-    monkeypatch.setenv("GREELS_ARCHIVE", str(tmp_path / "archive"))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(tmp_path / "archive"))
     api.delete_segment("a#00000.00")
     assert trash.entries()
     assert [p.name for p in library.sidecars()] == ["a.seg.json"]

@@ -1,4 +1,4 @@
-"""`greels reel` -- assemble, trim and export a cut.
+"""`splice reel` -- assemble, trim and export a cut.
 
 Everything else in this CLI is about the archive. This is the part you use
 while actually making something: take a suggestion or a search, put the
@@ -34,7 +34,7 @@ def _load(slug: str) -> Reel:
     reel = store.load(slug)
     if reel is None:
         known = [r.slug for r in store.load_all()]
-        hint = f"  have: {', '.join(known)}" if known else "  none yet -- `greels reel new`"
+        hint = f"  have: {', '.join(known)}" if known else "  none yet -- `splice reel new`"
         typer.echo(f"no reel {slug!r}\n{hint}")
         raise typer.Exit(1)
     return reel
@@ -160,7 +160,7 @@ def _shot_from_phrase(phrase: str, sidecars: list[Sidecar]) -> Shot:
         (s for s in sidecar.segments if s.id == hit["segment_id"]), None
     ) if sidecar else None
     if sidecar is None or segment is None:
-        typer.echo(f"! {hit['stem']} is in the index but not in the sidecars; run `greels index`")
+        typer.echo(f"! {hit['stem']} is in the index but not in the sidecars; run `splice index`")
         raise typer.Exit(1)
     return _cut_to_line(sidecar, segment, hit)
 
@@ -188,8 +188,8 @@ def reel_list():
     """Every reel, with its length and where it has got to."""
     reels = store.load_all()
     if not reels:
-        typer.echo("no reels yet\n  greels reels                       to see suggestions")
-        typer.echo("  greels reel new 'Title' --from <tag>  to start one from a suggestion")
+        typer.echo("no reels yet\n  splice reels                       to see suggestions")
+        typer.echo("  splice reel new 'Title' --from <tag>  to start one from a suggestion")
         return
     for reel in reels:
         typer.echo(
@@ -223,7 +223,7 @@ def _delivery(reel: Reel) -> str:
     return ", ".join(parts)
 
 
-SEARCH = typer.Option("", "--search", "-q", help="Full-text query, as `greels search`.")
+SEARCH = typer.Option("", "--search", "-q", help="Full-text query, as `splice search`.")
 TAG = typer.Option([], "--tag", "-t", help="Require this tag (repeatable).")
 RATING = typer.Option("", "--rating", help="favorite | rejected | none.")
 LIMIT = typer.Option(40, "--limit", "-n", help="Most a query may contribute.")
@@ -237,7 +237,7 @@ ORDER = typer.Option(
 def reel_new(
     title: str = typer.Argument(..., help="What the reel is called."),
     from_tag: str = typer.Option(
-        None, "--from", "-f", help="Seed from a `greels reels` suggestion, by tag."
+        None, "--from", "-f", help="Seed from a `splice reels` suggestion, by tag."
     ),
     segment: list[str] = typer.Option(
         [], "--segment", "-s", help="Seed with this segment (repeatable)."
@@ -280,7 +280,7 @@ def reel_new(
     typer.echo(f"created {reel.slug}  ({len(reel.shots)} shots, {_clock(reel.duration)})")
     if reel.shots:
         _print_shots(reel)
-    typer.echo(f"\n  greels reel show {reel.slug}")
+    typer.echo(f"\n  splice reel show {reel.slug}")
 
 
 def _dedupe(shots: list[Shot]) -> list[Shot]:
@@ -347,7 +347,7 @@ def _from_suggestion(tag: str, sidecars: list[Sidecar]) -> list[Shot]:
         (r for r in suggestions if r.tag == tag or r.title.lower() == tag.lower()), None
     )
     if match is None:
-        typer.echo(f"no suggestion for {tag!r}; `greels reels` lists them")
+        typer.echo(f"no suggestion for {tag!r}; `splice reels` lists them")
         raise typer.Exit(1)
 
     by_stem = {sc.asset.stem: sc for sc in sidecars}
@@ -669,7 +669,7 @@ def reel_export(
     editor: str = typer.Option(
         None, "--editor", "-e",
         help=f"Which editor to write it for: {editors.names_for_help()}. "
-             "Defaults to $GREELS_EDITOR, or Final Cut.",
+             "Defaults to $SPLICE_EDITOR, or Final Cut.",
     ),
     send: bool = typer.Option(
         False, "--send",
@@ -956,7 +956,7 @@ def reel_unused(
             f"{row['stem'][:30]:32} {row['id']}"
         )
     typer.echo(f"\n{len(rows)} unused" + (f", showing {limit}" if len(rows) > limit else ""))
-    typer.echo("  greels reel add <slug> --rating favorite   puts them all in one")
+    typer.echo("  splice reel add <slug> --rating favorite   puts them all in one")
 
 
 @reel_app.command("delete")
@@ -977,4 +977,4 @@ def reel_delete(
     store.delete(slug)
     typer.echo(f"deleted {slug}")
     if kept:
-        typer.echo(f"  a copy is in {kept.parent};  greels trash restore {kept.name}")
+        typer.echo(f"  a copy is in {kept.parent};  splice trash restore {kept.name}")

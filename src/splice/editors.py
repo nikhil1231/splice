@@ -1,6 +1,6 @@
 """Which editor the archive is being handed to, and what it can actually read.
 
-greels was written for Final Cut and its vocabulary shows it: keyword ranges,
+splice was written for Final Cut and its vocabulary shows it: keyword ranges,
 an event, a `.fcpxmld` bundle. Resolve is the same pipeline aimed at a
 different program, and the differences are not cosmetic -- a document written
 for one and handed to the other does not import worse, it imports empty:
@@ -51,7 +51,7 @@ class Editor:
     # column of aligned text: "in final cut" and "in resolve" line up where
     # "in davinci resolve" pushes the whole column six characters right.
     short: str
-    # The newest FCPXML both greels and this editor speak.
+    # The newest FCPXML both splice and this editor speak.
     fcpxml_version: str
     # Does it understand a `<keyword>` range on a clip? Only Final Cut does.
     keyword_ranges: bool
@@ -90,7 +90,7 @@ FINAL_CUT = Editor(
     name=FCP,
     label="Final Cut Pro",
     short="Final Cut",
-    # Apple's own current version, and the DTD greels validates against.
+    # Apple's own current version, and the DTD splice validates against.
     fcpxml_version="1.11",
     keyword_ranges=True,
     clip_captions=True,
@@ -156,11 +156,11 @@ def get(name: str | Editor | None = None) -> Editor:
 def default() -> Editor:
     """The editor to use when a command was not told one.
 
-    `GREELS_EDITOR` decides, and Final Cut wins the tie: every sidecar in this
+    `SPLICE_EDITOR` decides, and Final Cut wins the tie: every sidecar in this
     archive carries a Final Cut delivery record, and changing what a bare
-    `greels sync` means would offer all of it to Resolve on the next run.
+    `splice sync` means would offer all of it to Resolve on the next run.
     """
-    configured = os.environ.get("GREELS_EDITOR", "").strip()
+    configured = os.environ.get("SPLICE_EDITOR", "").strip()
     if not configured:
         return FINAL_CUT
     try:

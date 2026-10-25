@@ -4,9 +4,9 @@ import subprocess
 
 import pytest
 
-from greels import proxy
-from greels.cli import _carry_review_state
-from greels.schema import Asset, Segment, Sidecar
+from splice import proxy
+from splice.cli import _carry_review_state
+from splice.schema import Asset, Segment, Sidecar
 
 
 def sidecar(segments):
@@ -93,8 +93,8 @@ def test_a_real_failure_still_raises(monkeypatch):
 def test_growing_the_vocabulary_does_not_invalidate_the_archive(tmp_path, monkeypatch):
     """Promoting one tag used to mark every clip stale and trigger hours of
     re-analysis. Vocabulary growth is reclassify's job, not analyze's."""
-    from greels import config
-    from greels.analyze import prompt_sha
+    from splice import config
+    from splice.analyze import prompt_sha
 
     before = prompt_sha()
 
@@ -106,8 +106,8 @@ def test_growing_the_vocabulary_does_not_invalidate_the_archive(tmp_path, monkey
 
 
 def test_editing_the_prompt_does_invalidate(tmp_path, monkeypatch):
-    from greels import config
-    from greels.analyze import prompt_sha
+    from splice import config
+    from splice.analyze import prompt_sha
 
     before = prompt_sha()
     edited = tmp_path / "analyze.md"
@@ -148,7 +148,7 @@ def _ffmpeg(monkeypatch, keyframes=(0.0, 240.0, 480.0)):
 def test_a_proxy_is_480p_mono_and_seekable(tmp_path, monkeypatch):
     """Everything downstream reads this: the model, the browser's player, the
     poster frames, the loudness and the speech detection."""
-    from greels import config
+    from splice import config
 
     calls = _ffmpeg(monkeypatch)
     source = tmp_path / "a.MOV"
@@ -169,7 +169,7 @@ def test_a_proxy_is_480p_mono_and_seekable(tmp_path, monkeypatch):
 def test_a_proxy_carries_a_keyframe_where_every_chunk_will_be_cut(tmp_path, monkeypatch):
     """Otherwise a copied chunk snaps back to x264's own keyframe, up to 16.7 s
     earlier, and every timestamp the model reports for it is wrong by that."""
-    from greels import config
+    from splice import config
 
     calls = _ffmpeg(monkeypatch)
     source = tmp_path / "a.MOV"
@@ -215,10 +215,10 @@ def test_a_replaced_original_is_proxied_again(tmp_path, monkeypatch):
 
 
 def test_a_chunk_is_named_for_where_it_starts_and_overlaps_the_next(tmp_path, monkeypatch):
-    from greels import config
+    from splice import config
 
     calls = _ffmpeg(monkeypatch)
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     monkeypatch.setattr(proxy, "duration_of", lambda path: 500.0)
     source = tmp_path / "a.mp4"
     source.write_bytes(b"proxy")
@@ -239,7 +239,7 @@ def test_a_chunk_that_lands_on_a_keyframe_is_copied_rather_than_encoded(tmp_path
     """The proxy is already 480p15 at the quality analysis reads, so cutting it
     up is a copy of some of its packets. 5.04 s to 0.10 s per chunk."""
     calls = _ffmpeg(monkeypatch)
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     monkeypatch.setattr(proxy, "duration_of", lambda path: 500.0)
     source = tmp_path / "a.mp4"
     source.write_bytes(b"proxy")
@@ -256,7 +256,7 @@ def test_a_proxy_without_those_keyframes_is_chunked_the_slow_way(tmp_path, monke
     none at 240. Copying from there would move the chunk without saying so, so
     it is encoded instead -- slower, and still where it claims to start."""
     calls = _ffmpeg(monkeypatch, keyframes=(0.0, 16.667, 33.333))
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     monkeypatch.setattr(proxy, "duration_of", lambda path: 500.0)
     source = tmp_path / "a.mp4"
     source.write_bytes(b"proxy")

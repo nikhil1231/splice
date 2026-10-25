@@ -10,14 +10,14 @@ import re
 
 import pytest
 
-from greels import cli, config, library
-from greels.schema import Asset, Sidecar
+from splice import cli, config, library
+from splice.schema import Asset, Sidecar
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.delenv("GREELS_FCP_LIBRARY", raising=False)
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.delenv("SPLICE_FCP_LIBRARY", raising=False)
     for path in (config.raw_dir(), config.proxy_dir(), config.chunk_dir()):
         path.mkdir(parents=True)
     (config.export_dir() / "srt").mkdir(parents=True)
@@ -27,9 +27,9 @@ def archive(tmp_path, monkeypatch):
 @pytest.fixture
 def stubbed(monkeypatch):
     """ffmpeg, ffprobe and agy stand in; everything else is the real thing."""
-    import greels.analyze as analyze
-    import greels.probe as probe
-    import greels.proxy as proxy
+    import splice.analyze as analyze
+    import splice.probe as probe
+    import splice.proxy as proxy
 
     analysed: list[str] = []
 
@@ -69,7 +69,7 @@ def stubbed(monkeypatch):
 
     monkeypatch.setattr(analyze, "run_agy", fake_agy)
     monkeypatch.setattr(
-        "greels.export_fcpxml.validate", lambda *a, **k: None
+        "splice.export_fcpxml.validate", lambda *a, **k: None
     )
     return analysed
 
@@ -81,7 +81,7 @@ def drop(stem, content=None, suffix=".MOV"):
 
 
 def held(monkeypatch, clips):
-    import greels.export_fcpxml as mod
+    import splice.export_fcpxml as mod
 
     monkeypatch.setattr(mod.fcp, "imported_clips", lambda *a, **k: clips)
     monkeypatch.setattr(mod.fcp, "duplicate_names", lambda *a, **k: {})
@@ -202,7 +202,7 @@ def test_a_promoted_tag_reaches_the_export_without_a_second_command(
 def test_a_failed_analysis_does_not_stop_the_others_being_named(
     archive, stubbed, monkeypatch
 ):
-    import greels.analyze as analyze
+    import splice.analyze as analyze
 
     held(monkeypatch, {})
     drop("IMG_1")
@@ -253,7 +253,7 @@ def test_sync_passes_every_option_to_the_commands_it_calls():
 
     import typer
 
-    from greels import cli
+    from splice import cli
 
     tree = ast.parse(inspect.getsource(cli.sync))
     for node in ast.walk(tree):
@@ -287,7 +287,7 @@ def test_sync_reports_what_it_scanned(archive, stubbed, monkeypatch, capsys):
 def test_sync_leaves_the_audio_measurements_warm(archive, stubbed, monkeypatch):
     """Both are under a second a clip and both are wanted the moment you start
     cutting; doing them here means the first cut does not wait on ffmpeg."""
-    from greels import loudness, speech
+    from splice import loudness, speech
 
     held(monkeypatch, {})
     drop("IMG_8768")
@@ -305,7 +305,7 @@ def test_a_sync_of_a_scratch_archive_does_not_mirror_over_the_real_one(
     """`archive/` mirrors one media root and deletes what that root does not
     have. A sync of somewhere else, backing up without being asked, is how the
     transcripts that took hours of agy stop existing."""
-    monkeypatch.delenv("GREELS_ARCHIVE", raising=False)
+    monkeypatch.delenv("SPLICE_ARCHIVE", raising=False)
     held(monkeypatch, {})
     drop("IMG_8768")
 
@@ -325,7 +325,7 @@ def test_a_sync_mirrors_the_transcripts_it_just_made(
     from a terminal had nothing, and eleven of them sat outside git for two
     days before anybody opened the page."""
     saved = archive / "kept"
-    monkeypatch.setenv("GREELS_ARCHIVE", str(saved))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(saved))
     held(monkeypatch, {})
     drop("IMG_8768")
 
@@ -340,9 +340,9 @@ def test_a_sync_puts_the_new_subtitles_on_the_speech(archive, stubbed, monkeypat
     """The model estimates line times and is about half a second out, which is
     a caption arriving before the mouth moves. `align` was a thing you had to
     remember, on the evening you are least likely to."""
-    from greels import speech
+    from splice import speech
 
-    monkeypatch.setenv("GREELS_ARCHIVE", str(archive / "kept"))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(archive / "kept"))
     # The utterance really starts at 0.9; the model guessed 0. Inside the
     # 1.2s window, because a snap is a correction of half a second and not a
     # licence to move a caption anywhere.

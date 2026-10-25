@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>greels</title>
+<title>Splice</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%239a5b2c'/><path d='M13 10 L23 16 L13 22 Z' fill='%23fbfaf8'/></svg>">
 <style>
 :root {
@@ -726,7 +726,7 @@ body.panel-open main { margin-right: var(--panel-w); }
 .menu button[disabled]:hover { background: none; }
 
 /* The state of the machine around the archive, in the header, because that is
-   where the evenings happen. `greels doctor` said all of this already and
+   where the evenings happen. `splice doctor` said all of this already and
    said it in a terminal, which on an evening spent in the browser is nowhere:
    an index behind the sidecars, a drive that did not mount, or transcripts
    sitting in exactly one place were things you found out by remembering to
@@ -1113,7 +1113,7 @@ function syncUrl() {
     !(key === 'seg' && state.tab === 'Review')
     && to.searchParams.get(key) && to.searchParams.get(key) !== was.get(key));
   history[opened ? 'pushState' : 'replaceState'](null, '', next);
-  document.title = `${state.tab} · greels`;
+  document.title = `${state.tab} · Splice`;
 }
 /* Held while an address is being turned back into a page: everything that
    runs on the way -- a render, a panel closing -- would otherwise write the
@@ -1189,7 +1189,7 @@ function settleUrl(wants) {
   }
   syncUrl.held = false;
   history.replaceState(null, '', urlOf());
-  document.title = `${state.tab} · greels`;
+  document.title = `${state.tab} · Splice`;
 }
 
 window.addEventListener('popstate', async () => {
@@ -1246,7 +1246,7 @@ function renderNav() {
     el('button', { class: 'btn', title: 'Take in whatever is new in raw/',
       onclick: () => openCommand('sync') }, 'Sync raw'),
     el('button', { class: 'btn', 'aria-haspopup': 'menu',
-      title: 'The rest of greels',
+      title: 'The rest of Splice',
       onclick: e => openCommandMenu(e.currentTarget) }, 'Run \u25be'),
     editorChoice(),
     el('button', { class: 'btn', title: 'Copy the sidecars into the repo',
@@ -1345,7 +1345,7 @@ function applyFix(name) {
   openCommand(name);
 }
 
-/* The two things done every evening are buttons; the rest of greels is behind
+/* The two things done every evening are buttons; the rest of splice is behind
    this. A menu rather than ten more buttons in the header, and each item
    carries its own sentence, because "reclassify" and "align" mean nothing
    from the name alone and the wrong guess costs an evening.
@@ -2306,7 +2306,7 @@ function planFoot(plan) {
       onclick: () => duplicatePlan(plan.id) }, 'Duplicate'),
     el('button', { class: 'btn danger', onclick: () => {
       if (confirm(`Delete “${plan.title || 'Untitled plan'}”? A copy goes to index/.trash — `
-        + '`greels trash list` gets it back.')) deletePlan(plan.id).then(() => renderView());
+        + '`splice trash list` gets it back.')) deletePlan(plan.id).then(() => renderView());
     } }, 'Delete plan'));
 }
 
@@ -3585,7 +3585,7 @@ async function viewCut(slug) {
         } }, 'Duplicate'),
       el('button', { class: 'btn danger', onclick: async () => {
         if (!confirm(`Delete the cut “${cut.title}”? The footage is untouched, and a `
-          + `copy goes to index/.trash — \`greels trash list\` gets it back.`)) return;
+          + `copy goes to index/.trash — \`splice trash list\` gets it back.`)) return;
         await api('/api/cut/' + encodeURIComponent(slug), { method: 'DELETE' });
         state.openCut = null; toast('deleted'); renderView();
       } }, 'Delete')),
@@ -3766,7 +3766,7 @@ let renderTimer = null;
    with the subtitles as a track you can turn off; one to send to the people in
    it, where a track does not survive the sending. */
 /* What the original lines are called: the project's language, from
-   greels.yaml, or "Original" for one that has not said. */
+   splice.yaml, or "Original" for one that has not said. */
 const spokenName = () => state.overview?.language || 'Original';
 
 const RENDER_KINDS = [
@@ -4334,7 +4334,7 @@ async function segmentEditor(id, at, opts) {
                                * (enAt / Math.max(1, (row.en || '').length))),
                              (row.kok || '').length);
       /* The timing is a guess proportional to the text, which is what the
-         line's own timings already are; `greels align` measures them. */
+         line's own timings already are; `splice align` measures them. */
       const span = Math.max(0.2, row.end - row.start);
       const guess = row.start + span * (enAt / Math.max(1, (row.en || '').length));
       const mid = Math.min(row.end - 0.1, Math.max(row.start + 0.1, guess));
@@ -4384,11 +4384,11 @@ async function segmentEditor(id, at, opts) {
           el('button', { class: 'iconbtn', title: 'Remove this line',
             onclick: () => { f.rows.splice(i, 1); paint(); } }, '×'));
       }));
-      /* The rest of it -- that the timings are estimates and `greels align`
+      /* The rest of it -- that the timings are estimates and `splice align`
          measures them -- is a tooltip: it is true once and read once, and it
          was taking two lines of the pane every time. */
       label.textContent = `Subtitle lines (${f.rows.length}) — what the captions are made of`;
-      label.title = 'Timings are estimated; `greels align` measures them';
+      label.title = 'Timings are estimated; `splice align` measures them';
     };
 
     paint();
@@ -4502,7 +4502,7 @@ async function segmentEditor(id, at, opts) {
       el('button', { class: 'btn primary', onclick: save }, 'Save'),
       el('button', { class: 'btn danger spacer', onclick: async () => {
         if (!confirm('Delete this segment from the sidecar? The video is untouched, '
-          + 'and a copy of the sidecar goes to index/.trash — `greels trash list` '
+          + 'and a copy of the sidecar goes to index/.trash — `splice trash list` '
           + 'gets it back.')) return;
         const plansBefore = plansUsing(id).map(p => [p.id, planSnapshot(p, ['moments'])]);
         const shortlistAt = state.shortlist.findIndex(s => s.id === id);

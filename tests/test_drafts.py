@@ -11,15 +11,15 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from greels import backup, config, draft_generation as gen, drafts, index, reel, trash
-from greels.schema import Asset, Line, Segment, Sidecar
-from greels.server import Api, serve
+from splice import backup, config, draft_generation as gen, drafts, index, reel, trash
+from splice.schema import Asset, Line, Segment, Sidecar
+from splice.server import Api, serve
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.setenv("GREELS_ARCHIVE", str(tmp_path / "archive"))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(tmp_path / "archive"))
     config.raw_dir().mkdir(parents=True)
     (config.raw_dir() / "a.MOV").write_bytes(b"footage")
     sc = Sidecar(asset=Asset(file="a.MOV", stem="a", fingerprint="original", duration=180,
@@ -262,8 +262,8 @@ def test_drafting_uses_inline_schemas_and_never_grants_tool_permissions(archive,
 
 
 def test_export_snapshots_keep_order_trims_and_rebased_captions(archive, monkeypatch):
-    monkeypatch.setattr("greels.export_fcpxml.validate", lambda *a, **k: None)
-    monkeypatch.setattr("greels.loudness.gains_for", lambda *a, **k: {})
+    monkeypatch.setattr("splice.export_fcpxml.validate", lambda *a, **k: None)
+    monkeypatch.setattr("splice.loudness.gains_for", lambda *a, **k: {})
     api = Api()
     d = api.create_draft({"title": "Guess", "beats": [beat(132, 136), beat(2, 10)]})
     one = api.export_draft(d["id"], {"revision": d["revision"]})
@@ -281,8 +281,8 @@ def test_export_snapshots_keep_order_trims_and_rebased_captions(archive, monkeyp
 
 
 def test_http_routes_expose_conflicts_and_fresh_export_snapshots(archive, monkeypatch):
-    monkeypatch.setattr("greels.export_fcpxml.validate", lambda *a, **k: None)
-    monkeypatch.setattr("greels.loudness.gains_for", lambda *a, **k: {})
+    monkeypatch.setattr("splice.export_fcpxml.validate", lambda *a, **k: None)
+    monkeypatch.setattr("splice.loudness.gains_for", lambda *a, **k: {})
     server = serve(port=0, autosave=0)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()

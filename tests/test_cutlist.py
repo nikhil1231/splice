@@ -10,14 +10,14 @@ import csv
 
 import pytest
 
-from greels import config, export_csv, reel as store
-from greels.reel import Reel, Shot
-from greels.schema import Asset, Segment, Sidecar
+from splice import config, export_csv, reel as store
+from splice.reel import Reel, Shot
+from splice.schema import Asset, Segment, Sidecar
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     Sidecar(
         asset=Asset(file="a.MOV", stem="a", duration=120),
         segments=[

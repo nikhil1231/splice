@@ -7,13 +7,13 @@ boundary that no longer exists.
 
 import pytest
 
-from greels import config, library, thumbs
-from greels.schema import Asset, Segment, Sidecar
+from splice import config, library, thumbs
+from splice.schema import Asset, Segment, Sidecar
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     proxy = library.proxy_for("a")
     proxy.parent.mkdir(parents=True, exist_ok=True)
     proxy.write_bytes(b"proxy")

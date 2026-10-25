@@ -227,7 +227,7 @@ def _write_reels(conn: sqlite3.Connection) -> None:
 def connect(db: Path | None = None) -> sqlite3.Connection:
     db = db or config.db_path()
     if not db.exists():
-        raise FileNotFoundError(f"no index at {db}; run `greels index` first")
+        raise FileNotFoundError(f"no index at {db}; run `splice index` first")
     conn = sqlite3.connect(db)
     conn.row_factory = sqlite3.Row
     return conn

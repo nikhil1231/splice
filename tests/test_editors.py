@@ -9,10 +9,10 @@ from fractions import Fraction
 
 import pytest
 
-from greels import editors
-from greels.export_fcpxml import build_document
-from greels.schema import Asset, Segment, Sidecar
-from greels.taxonomy import Taxonomy
+from splice import editors
+from splice.export_fcpxml import build_document
+from splice.schema import Asset, Segment, Sidecar
+from splice.taxonomy import Taxonomy
 
 
 @pytest.fixture
@@ -78,16 +78,16 @@ def test_a_name_that_is_neither_is_refused_rather_than_guessed_at():
 def test_nothing_asked_for_means_final_cut(monkeypatch):
     """Every sidecar here carries a Final Cut delivery record.
 
-    A bare `greels sync` that started meaning Resolve would re-offer the whole
+    A bare `splice sync` that started meaning Resolve would re-offer the whole
     archive on the next run.
     """
-    monkeypatch.delenv("GREELS_EDITOR", raising=False)
+    monkeypatch.delenv("SPLICE_EDITOR", raising=False)
     assert editors.get(None).name == editors.FCP
     assert editors.default().name == editors.FCP
 
 
 def test_the_environment_can_change_the_default(monkeypatch):
-    monkeypatch.setenv("GREELS_EDITOR", "resolve")
+    monkeypatch.setenv("SPLICE_EDITOR", "resolve")
     assert editors.default().name == editors.RESOLVE
     assert editors.get(None).name == editors.RESOLVE
 
@@ -98,7 +98,7 @@ def test_an_unreadable_preference_does_not_stop_a_run(monkeypatch):
     It is read on every command; raising here would make the archive
     unreachable until somebody found the export line in a shell profile.
     """
-    monkeypatch.setenv("GREELS_EDITOR", "premiere")
+    monkeypatch.setenv("SPLICE_EDITOR", "premiere")
     assert editors.default().name == editors.FCP
 
 
@@ -200,16 +200,16 @@ def test_each_editor_is_handed_a_version_it_speaks(sidecars, taxonomy):
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    from greels import config
+    from splice import config
 
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.delenv("GREELS_EDITOR", raising=False)
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.delenv("SPLICE_EDITOR", raising=False)
     config.index_dir().mkdir(parents=True, exist_ok=True)
     return tmp_path
 
 
 def _two_clips():
-    from greels import config
+    from splice import config
 
     for stem, duration in (("lunch", 40.0), ("house", 90.0)):
         Sidecar(
@@ -227,7 +227,7 @@ def test_the_two_incoming_files_do_not_overwrite_each_other(archive, capsys):
     silently: the file is still there, still valid, and now for the wrong
     program.
     """
-    from greels import cli, config
+    from splice import cli, config
 
     _two_clips()
     cli.export_fcpxml_cmd(only=None, dest=None, event=None,
@@ -246,7 +246,7 @@ def test_a_command_told_an_editor_it_does_not_know_stops(archive, capsys):
     """
     import typer
 
-    from greels import cli, config
+    from splice import cli, config
 
     _two_clips()
     with pytest.raises(typer.Exit):
@@ -266,7 +266,7 @@ def test_sending_a_timeline_to_final_cut_is_refused_rather_than_ignored(
     """
     import typer
 
-    from greels import cli_reel, reel as store
+    from splice import cli_reel, reel as store
 
     _two_clips()
     store.Reel(slug="r", title="R",
@@ -286,7 +286,7 @@ def test_a_resolve_that_will_not_answer_still_leaves_the_timeline_written(
     Resolve is usually shut. Losing the export because of that would make the
     flag actively dangerous to reach for.
     """
-    from greels import cli_reel, config, reel as store, resolve
+    from splice import cli_reel, config, reel as store, resolve
 
     _two_clips()
     store.Reel(slug="r", title="R",
@@ -308,7 +308,7 @@ def test_a_cut_remembers_which_editor_its_timeline_was_written_for(archive):
     `reel list` reporting a cut as exported while the file on disk is the
     other editor's is a sentence that reads true and is not.
     """
-    from greels import cli_reel, reel as store
+    from splice import cli_reel, reel as store
 
     _two_clips()
     store.Reel(slug="r", title="R",
@@ -334,7 +334,7 @@ def test_styled_titles_are_refused_for_resolve_rather_than_written_empty(
     """
     import typer
 
-    from greels import cli
+    from splice import cli
 
     doc = tmp_path / "Ep1.fcpxml"
     doc.write_text("<fcpxml/>")

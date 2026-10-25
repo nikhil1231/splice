@@ -10,11 +10,11 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from greels.export_fcpxml import build_document
-from greels.export_srt import render, timecode
-from greels.fcptime import timebase
-from greels.schema import Asset, Line, Segment, Sidecar
-from greels.taxonomy import Taxonomy
+from splice.export_fcpxml import build_document
+from splice.export_srt import render, timecode
+from splice.fcptime import timebase
+from splice.schema import Asset, Line, Segment, Sidecar
+from splice.taxonomy import Taxonomy
 
 
 @pytest.fixture
@@ -166,7 +166,7 @@ def test_timecode_format():
 
 
 def _sc(stem, segments, exported=None):
-    from greels.schema import ExportRecord
+    from splice.schema import ExportRecord
 
     sc = Sidecar(
         asset=Asset(file=f"{stem}.MOV", stem=stem, duration=100, fps="30",
@@ -195,7 +195,7 @@ def test_content_sha_tracks_what_an_export_would_contain():
 
 
 def test_pending_splits_never_exported_from_changed():
-    from greels.export_fcpxml import pending
+    from splice.export_fcpxml import pending
 
     never = _sc("never", [Segment(id="never#0", start=0, end=10, title="t")])
     current = _sc("current", [Segment(id="current#0", start=0, end=10, title="t")])
@@ -210,14 +210,14 @@ def test_pending_splits_never_exported_from_changed():
 
 
 def test_unanalysed_clips_are_never_pending():
-    from greels.export_fcpxml import pending
+    from splice.export_fcpxml import pending
 
     assert pending([_sc("empty", [])]) == ([], [])
 
 
 def test_export_rejects_a_document_apples_dtd_would_refuse(tmp_path, monkeypatch, taxonomy):
     """Validation must be able to fail, not just be present."""
-    import greels.export_fcpxml as mod
+    import splice.export_fcpxml as mod
 
     monkeypatch.setattr(mod, "validate", lambda *a, **k: "element marker: validity error")
     with pytest.raises(ValueError, match="DTD"):
@@ -226,10 +226,10 @@ def test_export_rejects_a_document_apples_dtd_would_refuse(tmp_path, monkeypatch
 
 
 def test_marking_a_clip_imported_takes_it_out_of_pending(tmp_path, monkeypatch):
-    from greels import config
-    from greels.export_fcpxml import mark_exported, pending
+    from splice import config
+    from splice.export_fcpxml import mark_exported, pending
 
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     sc = _sc("a", [Segment(id="a#0", start=0, end=10, title="t")])
     sc.save(config.sidecar_path("a"))
 
@@ -251,16 +251,16 @@ def test_marking_a_clip_imported_takes_it_out_of_pending(tmp_path, monkeypatch):
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    from greels import config
+    from splice import config
 
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.delenv("GREELS_FCP_LIBRARY", raising=False)
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.delenv("SPLICE_FCP_LIBRARY", raising=False)
     config.index_dir().mkdir(parents=True, exist_ok=True)
     return tmp_path
 
 
 def _saved(stem, **kw):
-    from greels import config
+    from splice import config
 
     sc = _sc(stem, [Segment(id=f"{stem}#0", start=0, end=10, title="t")], **kw)
     sc.save(config.sidecar_path(stem))
@@ -269,7 +269,7 @@ def _saved(stem, **kw):
 
 def _library(monkeypatch, held, duplicates=None):
     """Stand in for Final Cut. `None` means the library could not be read."""
-    import greels.export_fcpxml as mod
+    import splice.export_fcpxml as mod
 
     monkeypatch.setattr(mod.fcp, "imported_clips", lambda *a, **k: held)
     monkeypatch.setattr(mod.fcp, "duplicate_names", lambda *a, **k: duplicates or {})
@@ -277,7 +277,7 @@ def _library(monkeypatch, held, duplicates=None):
 
 def test_an_offer_that_was_never_imported_comes_back(archive, monkeypatch):
     """The bug that lost eight clips: writing the file marked them delivered."""
-    from greels.export_fcpxml import mark_offered, pending, reconcile
+    from splice.export_fcpxml import mark_offered, pending, reconcile
 
     sc = _saved("airtel_sim_card")
     mark_offered([sc])
@@ -289,7 +289,7 @@ def test_an_offer_that_was_never_imported_comes_back(archive, monkeypatch):
 
 
 def test_an_offer_final_cut_accepted_is_confirmed(archive, monkeypatch):
-    from greels.export_fcpxml import mark_offered, pending, reconcile
+    from splice.export_fcpxml import mark_offered, pending, reconcile
 
     sc = _saved("lunch")
     mark_offered([sc])
@@ -303,7 +303,7 @@ def test_an_offer_final_cut_accepted_is_confirmed(archive, monkeypatch):
 
 def test_a_clip_imported_by_hand_is_noticed(archive, monkeypatch):
     """Importing grandparents.fcpxml yourself should not leave it in the queue."""
-    from greels.export_fcpxml import pending, reconcile
+    from splice.export_fcpxml import pending, reconcile
 
     sc = _saved("lunch")
     _library(monkeypatch, {"lunch": 1})
@@ -313,7 +313,7 @@ def test_a_clip_imported_by_hand_is_noticed(archive, monkeypatch):
 
 
 def test_a_changed_clip_is_offered_again(archive, monkeypatch):
-    from greels.export_fcpxml import pending, reconcile
+    from splice.export_fcpxml import pending, reconcile
 
     sc = _saved("lunch")
     _library(monkeypatch, {"lunch": 1})
@@ -325,7 +325,7 @@ def test_a_changed_clip_is_offered_again(archive, monkeypatch):
 
 def test_a_re_offer_is_confirmed_when_final_cut_grows_a_second_copy(archive, monkeypatch):
     """Final Cut cannot update a clip, so the copy count is the only signal."""
-    from greels.export_fcpxml import mark_offered, pending, reconcile
+    from splice.export_fcpxml import mark_offered, pending, reconcile
 
     sc = _saved("lunch")
     _library(monkeypatch, {"lunch": 1})
@@ -346,8 +346,8 @@ def test_a_re_offer_is_confirmed_when_final_cut_grows_a_second_copy(archive, mon
 
 
 def test_a_clip_renamed_after_import_is_still_recognised(archive, monkeypatch):
-    from greels import config
-    from greels.export_fcpxml import pending, reconcile
+    from splice import config
+    from splice.export_fcpxml import pending, reconcile
 
     sc = _saved("IMG_8768")
     _library(monkeypatch, {"IMG_8768": 1})
@@ -364,7 +364,7 @@ def test_a_clip_renamed_after_import_is_still_recognised(archive, monkeypatch):
 
 def test_an_unreadable_library_changes_nothing(archive, monkeypatch):
     """Guessing either way is worse than trusting what the sidecars say."""
-    from greels.export_fcpxml import mark_offered, pending, reconcile
+    from splice.export_fcpxml import mark_offered, pending, reconcile
 
     sc = _saved("lunch")
     mark_offered([sc])
@@ -378,9 +378,9 @@ def test_an_unreadable_library_changes_nothing(archive, monkeypatch):
 
 
 def test_reconcile_writes_its_corrections_to_disk(archive, monkeypatch):
-    from greels import config
-    from greels.export_fcpxml import mark_offered, reconcile
-    from greels.schema import Sidecar
+    from splice import config
+    from splice.export_fcpxml import mark_offered, reconcile
+    from splice.schema import Sidecar
 
     sc = _saved("airtel_sim_card")
     mark_offered([sc])
@@ -394,8 +394,8 @@ def test_a_legacy_sidecar_keeps_its_import_state(archive):
     """The 55 sidecars written before the split must still load correctly."""
     import json
 
-    from greels import config
-    from greels.schema import Sidecar
+    from splice import config
+    from splice.schema import Sidecar
 
     sc = _sc("lunch", [Segment(id="lunch#0", start=0, end=10, title="t")])
     payload = sc.model_dump(mode="json")
@@ -414,9 +414,9 @@ def test_a_legacy_sidecar_keeps_its_import_state(archive):
 def test_srt_export_removes_files_no_segment_claims(archive):
     """The filename carries the segment's boundaries, so a re-analysis that
     nudges one orphans a file. 210 files for 155 segments went unnoticed."""
-    from greels import config
-    from greels.export_srt import write
-    from greels.schema import Line
+    from splice import config
+    from splice.export_srt import write
+    from splice.schema import Line
 
     sc = _sc("lunch", [
         Segment(id="lunch#0", start=0, end=27, title="Chat",
@@ -440,9 +440,9 @@ def test_srt_export_removes_files_no_segment_claims(archive):
 
 
 def test_a_partial_srt_export_only_prunes_what_it_looked_at(archive):
-    from greels import config
-    from greels.export_srt import write
-    from greels.schema import Line
+    from splice import config
+    from splice.export_srt import write
+    from splice.schema import Line
 
     for stem in ("lunch", "balcony"):
         sc = _sc(stem, [
@@ -466,10 +466,10 @@ def test_a_partial_srt_export_only_prunes_what_it_looked_at(archive):
 @pytest.fixture
 def mirrored(tmp_path, monkeypatch):
     """A live index and an archive that already holds copies of it."""
-    from greels import backup as store, config
+    from splice import backup as store, config
 
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path / "media"))
-    monkeypatch.setenv("GREELS_ARCHIVE", str(tmp_path / "archive"))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path / "media"))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(tmp_path / "archive"))
 
     config.index_dir().mkdir(parents=True)
     for stem in "abcdef":
@@ -482,13 +482,13 @@ def mirrored(tmp_path, monkeypatch):
 
 
 def _index_dir():
-    from greels import config
+    from splice import config
 
     return config.index_dir()
 
 
 def _sidecar_path(stem):
-    from greels import config
+    from splice import config
 
     return config.sidecar_path(stem)
 
@@ -496,7 +496,7 @@ def _sidecar_path(stem):
 def test_an_unreadable_media_root_does_not_empty_the_backup(mirrored, monkeypatch, tmp_path):
     """The media root is a separate volume. Unmounted, it is not an archive
     with nothing in it -- it is an archive nobody can see."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path / "unmounted"))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path / "unmounted"))
 
     with pytest.raises(mirrored.Refused, match="does not exist"):
         mirrored.backup()
@@ -547,7 +547,7 @@ def test_no_amount_of_forcing_mirrors_a_directory_that_is_not_there(
 ):
     """An empty live directory is "I deleted them"; a missing one is "the drive
     is not mounted", and there is nothing to mirror, only something to lose."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path / "unmounted"))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path / "unmounted"))
 
     with pytest.raises(mirrored.Refused, match="does not exist"):
         mirrored.backup(force=True)
@@ -579,7 +579,7 @@ def test_a_failed_export_leaves_the_previous_one_intact(tmp_path, monkeypatch, t
     Writing straight to the destination and raising afterwards left an invalid
     file there — and, worse, replaced a perfectly good one with it.
     """
-    from greels import export_fcpxml
+    from splice import export_fcpxml
 
     dest = tmp_path / "incoming.fcpxml"
     export_fcpxml.write_validated(build_document(sidecars, taxonomy), dest)
@@ -597,8 +597,8 @@ def test_export_all_writes_the_whole_library_not_the_incoming_queue(archive, mon
     """`export all` used to call the FCPXML command without `new=`, which
     arrives as an OptionInfo and is truthy -- so it wrote incoming.fcpxml with
     only the undelivered clips, and stamped them as offered on the way."""
-    from greels import cli, config
-    from greels.export_fcpxml import mark_offered
+    from splice import cli, config
+    from splice.export_fcpxml import mark_offered
 
     _library(monkeypatch, {})
     kept = _saved("already_offered")
@@ -615,7 +615,7 @@ def test_export_all_writes_the_whole_library_not_the_incoming_queue(archive, mon
 
 def test_a_backup_that_is_interrupted_leaves_the_old_copy_whole(mirrored, monkeypatch):
     """This is the copy of the only two things here nothing regenerates."""
-    from greels import backup as store, config
+    from splice import backup as store, config
 
     live = next(config.index_dir().glob("*.seg.json"))
     saved = (store.archive_root() / "sidecars") / live.name

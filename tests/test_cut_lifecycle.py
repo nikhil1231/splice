@@ -13,17 +13,17 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from greels import (
+from splice import (
     backup, cli_reel, config, export_reel, index, library, reel as store, rename, thumbs,
 )
-from greels.schema import Asset, Line, Segment, Sidecar
+from splice.schema import Asset, Line, Segment, Sidecar
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.setenv("GREELS_ARCHIVE", str(tmp_path / "repo"))
-    monkeypatch.setattr("greels.export_fcpxml.validate", lambda *a, **k: None)
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(tmp_path / "repo"))
+    monkeypatch.setattr("splice.export_fcpxml.validate", lambda *a, **k: None)
 
     config.raw_dir().mkdir(parents=True)
     for stem, title in (("IMG_9001", "The money box"), ("lunch", "Lunch"),
@@ -164,7 +164,7 @@ def test_a_poster_frame_follows_a_rename(cut, monkeypatch):
 def test_the_same_cut_renders_to_a_file_the_same_length_as_the_timeline(cut, tmp_path, monkeypatch):
     """The draft stands in for the timeline. One that runs two seconds shorter
     than the thing it stands in for is worse than no draft."""
-    from greels import render
+    from splice import render
 
     calls = []
 
@@ -173,7 +173,7 @@ def test_the_same_cut_renders_to_a_file_the_same_length_as_the_timeline(cut, tmp
         Path(args[-1]).write_bytes(b"video")
 
     monkeypatch.setattr(render, "_run", fake_run)
-    monkeypatch.setattr("greels.speech.runs_for", lambda stem, cache=None: [])
+    monkeypatch.setattr("splice.speech.runs_for", lambda stem, cache=None: [])
 
     project, resolved = export_reel.write(cut, dest_dir=tmp_path / "out")
     result = render.render(cut, dest=tmp_path / "out" / "money.mp4", captions="none")
@@ -187,11 +187,11 @@ def test_the_same_cut_renders_to_a_file_the_same_length_as_the_timeline(cut, tmp
 
 
 def test_a_render_of_the_cut_carries_every_caption_once(cut, tmp_path, monkeypatch):
-    from greels import captions, render
+    from splice import captions, render
 
     monkeypatch.setattr(render, "_run", lambda args, on_progress=None:
                         Path(args[-1]).write_bytes(b"video"))
-    monkeypatch.setattr("greels.speech.runs_for", lambda stem, cache=None: [])
+    monkeypatch.setattr("splice.speech.runs_for", lambda stem, cache=None: [])
     if not captions.available():
         pytest.skip("no font or no Pillow on this machine")
 

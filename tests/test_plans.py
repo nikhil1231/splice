@@ -5,7 +5,7 @@ is what a record needs: that an old copy cannot be saved over a newer one,
 that the trash keeps what it replaced without keeping every keystroke, and
 that re-analysis renumbering the segments does not quietly lose its moments.
 The states are the other half -- one derivation, and every badge in the
-browser and the line in `greels status` reads it. The schedule is the third:
+browser and the line in `splice status` reads it. The schedule is the third:
 the order the ready ones go out in, and a posted reel keeping its place.
 """
 
@@ -13,16 +13,16 @@ from datetime import timedelta
 
 import pytest
 
-from greels import backup, config, index, plans, reel, trash
-from greels.drafts import Conflict
-from greels.schema import Asset, Segment, Sidecar
-from greels.server import Api
+from splice import backup, config, index, plans, reel, trash
+from splice.drafts import Conflict
+from splice.schema import Asset, Segment, Sidecar
+from splice.server import Api
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    monkeypatch.setenv("GREELS_ARCHIVE", str(tmp_path / "archive"))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ARCHIVE", str(tmp_path / "archive"))
     Sidecar(
         asset=Asset(file="a.MOV", stem="a", duration=120, fps="30"),
         segments=[

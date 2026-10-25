@@ -5,13 +5,13 @@ This moves real source media, so the guards matter more than the heuristic.
 
 import pytest
 
-from greels import config, library, rename
-from greels.schema import Asset, Line, Segment, Sidecar
+from splice import config, library, rename
+from splice.schema import Asset, Line, Segment, Sidecar
 
 
 @pytest.fixture
 def archive(tmp_path, monkeypatch):
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
     config.raw_dir().mkdir(parents=True)
     config.proxy_dir().mkdir(parents=True)
     config.chunk_dir().mkdir(parents=True)
@@ -178,8 +178,8 @@ def test_a_rename_carries_the_cuts_that_use_the_clip(tmp_path, monkeypatch):
     Everything else a reel depends on -- a renumbered segment, a re-analysis,
     an index rebuild -- it survives on its own.
     """
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    from greels import reel as store
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    from splice import reel as store
 
     raw = tmp_path / "raw"
     raw.mkdir(parents=True)
@@ -208,8 +208,8 @@ def test_a_rename_carries_the_cuts_that_use_the_clip(tmp_path, monkeypatch):
 def test_a_rename_carries_the_plans_that_hold_the_clip(tmp_path, monkeypatch):
     """A plan finds its moments by (clip, in, out) too, and it is the only
     record of what was published: a rename that left it behind orphaned them."""
-    monkeypatch.setenv("GREELS_ROOT", str(tmp_path))
-    from greels import plans as store
+    monkeypatch.setenv("SPLICE_ROOT", str(tmp_path))
+    from splice import plans as store
 
     raw = tmp_path / "raw"
     raw.mkdir(parents=True)
